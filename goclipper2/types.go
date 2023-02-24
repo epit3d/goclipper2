@@ -3,92 +3,68 @@ package goclipper2
 // #cgo LDFLAGS: /usr/local/lib/libclipper2c.so
 // #include "clipper2c/clipper2c.h"
 import "C"
-import (
-	"log"
-	"unsafe"
-)
 
-type CPathsD struct {
-	Path C.ClipperPathsD
+type ClipperClipper64 struct {
+	P *C.ClipperClipper64
 }
 
-type CPointD struct {
-	Point C.ClipperPointD
+type ClipperClipperD struct {
+	P *C.ClipperClipperD
 }
 
-type CPaths64 struct {
-	Path *C.ClipperPath64
+type ClipperClipperOffset struct {
+	P *C.ClipperClipperOffset
 }
 
-type CPath64 struct {
+type ClipperPath64 struct {
 	P *C.ClipperPath64
 }
 
-func NewCPath64() *CPath64 {
-	var mem unsafe.Pointer = C.malloc(500)
-
-	res := C.clipper_path64(mem)
-
-	return &CPath64{
-		P: res,
-	}
+type ClipperPathD struct {
+	P *C.ClipperPathD
 }
 
-func (p *CPath64) AddPoint(pt CPoint64) {
-	sizeBefore := C.clipper_path64_length(p.P)
-
-	C.clipper_path64_add_point(p.P, pt.Point)
-
-	sizeAfter := C.clipper_path64_length(p.P)
-	log.Println("sizes: ", sizeBefore, sizeAfter)
+type ClipperPaths64 struct {
+	P *C.ClipperPaths64
 }
 
-func (subjects *CPaths64) BooleanOp(clips *CPaths64, clipType CClipType, fillRule CFillRule) *CPaths64 {
-	// mem := make(unsafe.Pointer, 500)
-	// var mem unsafe.Pointer
-	// C.clipper_paths64_boolean_op(mem, 0, 0, subjects.Path, clips.Path)
-
-	return nil
+type ClipperPathsD struct {
+	P *C.ClipperPathsD
 }
 
-type CPoint64 struct {
-	Point C.ClipperPoint64
+type ClipperRect64 struct {
+	P *C.ClipperRect64
 }
 
-func NewCPoint64(x, y int64) CPoint64 {
-	return CPoint64{
-		Point: C.ClipperPoint64{
-			x: C.long(x),
-			y: C.long(y),
-		},
-	}
+type ClipperRectD struct {
+	P *C.ClipperRectD
 }
 
-type CRect64 struct {
-	Rect C.ClipperRect64
+type ClipperPolyTree64 struct {
+	P *C.ClipperPolyTree64
 }
 
-type CRectD struct {
-	Rect C.ClipperRectD
+type ClipperPolyTreeD struct {
+	P *C.ClipperPolyTreeD
 }
 
-type CFillRule string
+type CFillRule int
 
 const (
-	EvenOdd  CFillRule = "EvenOdd"
-	NonZero  CFillRule = "NonZero"
-	Positive CFillRule = "Positive"
-	Negative CFillRule = "Negative"
+	EvenOdd  CFillRule = 0
+	NonZero  CFillRule = 1
+	Positive CFillRule = 2
+	Negative CFillRule = 3
 )
 
-type CClipType string
+type CClipType int
 
 const (
-	None         CClipType = "None"
-	Intersection CClipType = "Intersection"
-	Union        CClipType = "Union"
-	Difference   CClipType = "Difference"
-	XOR          CClipType = "XOR"
+	None         CClipType = 0
+	Intersection CClipType = 1
+	Union        CClipType = 2
+	Difference   CClipType = 3
+	XOR          CClipType = 4
 )
 
 type CPathType string
