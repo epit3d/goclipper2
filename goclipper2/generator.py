@@ -1,6 +1,7 @@
 from pycparser import c_ast, parse_file
 from typing import Tuple, List
 from dataclasses import dataclass
+from predef import methods
 
 # types_mapping define how each type of C program is treated inside golang templating
 types_mapping = {
@@ -98,7 +99,8 @@ def template_constructor(functype: Type, params: List[Type], has_mem: bool):
         f"{p.name} {update_name_sign(p)}" for p in params
     ])
 
-    param_call = ", ".join([update_name_pass(p) for p in params])
+    param_call = ", ".join(
+        ["*" if p.is_ptr else "" + update_name_pass(p) for p in params])
 
     return f"""
     func {functype.name.capitalize()}({param_signature}) {"*" if functype.is_ptr else ""}{functype.type_name} {{
@@ -161,6 +163,12 @@ class FuncDefVisitor(c_ast.NodeVisitor):
             return
 
         function = parse_decl(node)
+
+        try:
+            print(methods[function.name])
+            return
+        except KeyError:
+            ...
 
         if not node.args:
             return

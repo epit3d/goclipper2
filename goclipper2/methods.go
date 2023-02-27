@@ -177,22 +177,28 @@ func (path *ClipperPathD) Clipper_pathd_get_point(idx int64) ClipperPointD {
 
 }
 
-func (path *ClipperPath64) Clipper_path64_to_points() *ClipperPoint64 {
-	var mem unsafe.Pointer = C.malloc(0)
+func (path *ClipperPath64) Clipper_path64_to_points() []ClipperPoint64 {
+	var res []ClipperPoint64
+	l := path.Clipper_path64_length()
+	var i int64
 
-	return &ClipperPoint64{
-		P: C.clipper_path64_to_points(mem, path.P),
+	for i = 0; i < l; i++ {
+		n := path.Clipper_path64_get_point(i)
+		res = append(res, n)
 	}
-
+	return res
 }
 
-func (path *ClipperPathD) Clipper_pathd_to_points() *ClipperPointD {
-	var mem unsafe.Pointer = C.malloc(0)
+func (path *ClipperPathD) Clipper_pathd_to_points() []ClipperPointD {
+	var res []ClipperPointD
+	l := path.Clipper_pathd_length()
+	var i int64
 
-	return &ClipperPointD{
-		P: C.clipper_pathd_to_points(mem, path.P),
+	for i = 0; i < l; i++ {
+		n := path.Clipper_pathd_get_point(i)
+		res = append(res, n)
 	}
-
+	return res
 }
 
 func (paths *ClipperPaths64) Clipper_paths64_length() int64 {
@@ -206,15 +212,29 @@ func (paths *ClipperPathsD) Clipper_pathsd_length() int64 {
 }
 
 func (paths *ClipperPaths64) Clipper_paths64_lengths() []int64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var lengths []int64
 
-	return C.clipper_paths64_lengths(mem, paths.P)
+	l := paths.Clipper_paths64_length()
+
+	var i int64
+	for i = 0; i < l; i++ {
+		lengths = append(lengths, paths.Clipper_paths64_get_path(i).Clipper_path64_length())
+	}
+
+	return lengths
 }
 
-func (paths *ClipperPathsD) Clipper_pathsd_lengths() *int64 {
-	var mem unsafe.Pointer = C.malloc(0)
+func (paths *ClipperPathsD) Clipper_pathsd_lengths() []int64 {
+	var lengths []int64
 
-	return int64(C.clipper_pathsd_lengths(mem, paths.P))
+	l := paths.Clipper_pathsd_length()
+
+	var i int64
+	for i = 0; i < l; i++ {
+		lengths = append(lengths, paths.Clipper_pathsd_get_path(i).Clipper_pathd_length())
+	}
+
+	return lengths
 }
 
 func (paths *ClipperPaths64) Clipper_paths64_path_length(idx int64) int64 {
@@ -297,40 +317,40 @@ func (paths *ClipperPathsD) Clipper_pathsd_translate(dx float64, dy float64) *Cl
 
 }
 
-func (path *ClipperPath64) Clipper_path64_scale(sx float64, sy float64, error_code int64) *ClipperPath64 {
-	var mem unsafe.Pointer = C.malloc(0)
+func (path *ClipperPath64) Clipper_path64_scale(sx float64, sy float64) (*ClipperPath64, int) {
+	mem := C.malloc(0)
+	error_code := C.int(0)
 
 	return &ClipperPath64{
-		P: C.clipper_path64_scale(mem, path.P, C.double(sx), C.double(sy), C.int(error_code)),
-	}
-
+		P: C.clipper_path64_scale(mem, path.P, C.double(sx), C.double(sy), &error_code),
+	}, int(error_code)
 }
 
-func (path *ClipperPathD) Clipper_pathd_scale(sx float64, sy float64, error_code int64) *ClipperPathD {
-	var mem unsafe.Pointer = C.malloc(0)
+func (path *ClipperPathD) Clipper_pathd_scale(sx float64, sy float64) (*ClipperPathD, int) {
+	mem := C.malloc(0)
+	error_code := C.int(0)
 
 	return &ClipperPathD{
-		P: C.clipper_pathd_scale(mem, path.P, C.double(sx), C.double(sy), C.int(error_code)),
-	}
-
+		P: C.clipper_pathd_scale(mem, path.P, C.double(sx), C.double(sy), &error_code),
+	}, int(error_code)
 }
 
-func (paths *ClipperPaths64) Clipper_paths64_scale(sx float64, sy float64, error_code int64) *ClipperPaths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+func (path *ClipperPaths64) Clipper_paths64_scale(sx float64, sy float64) (*ClipperPaths64, int) {
+	mem := C.malloc(0)
+	error_code := C.int(0)
 
 	return &ClipperPaths64{
-		P: C.clipper_paths64_scale(mem, paths.P, C.double(sx), C.double(sy), C.int(error_code)),
-	}
-
+		P: C.clipper_paths64_scale(mem, path.P, C.double(sx), C.double(sy), &error_code),
+	}, int(error_code)
 }
 
-func (paths *ClipperPathsD) Clipper_pathsd_scale(sx float64, sy float64, error_code int64) *ClipperPathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+func (path *ClipperPathsD) Clipper_pathsd_scale(sx float64, sy float64) (*ClipperPathsD, int) {
+	mem := C.malloc(0)
+	error_code := C.int(0)
 
 	return &ClipperPathsD{
-		P: C.clipper_pathsd_scale(mem, paths.P, C.double(sx), C.double(sy), C.int(error_code)),
-	}
-
+		P: C.clipper_pathsd_scale(mem, path.P, C.double(sx), C.double(sy), &error_code),
+	}, int(error_code)
 }
 
 func (path *ClipperPath64) Clipper_path64_trim_collinear(is_open_path int64) *ClipperPath64 {
@@ -889,19 +909,11 @@ func (a *ClipperRectD) Clipper_rectd_intersects(b ClipperRectD) int64 {
 }
 
 func (rect *ClipperRect64) Clipper_rect64_to_struct() ClipperRect64 {
-
-	return ClipperRect64{
-		P: C.clipper_rect64_to_struct(rect.P),
-	}
-
+	return *rect
 }
 
 func (rect *ClipperRectD) Clipper_rectd_to_struct() ClipperRectD {
-
-	return ClipperRectD{
-		P: C.clipper_rectd_to_struct(rect.P),
-	}
-
+	return *rect
 }
 
 func (c *ClipperClipper64) Clipper_clipper64_set_preserve_collinear(t int64) {
