@@ -2,6 +2,21 @@ from pycparser import c_ast, parse_file
 from typing import Tuple, List
 from dataclasses import dataclass
 
+# types_mapping define how each type of C program is treated inside golang templating
+types_mapping = {
+    'int64_t': 'int64',
+    'double': 'float64',
+    'int': 'int64',
+    'int64': 'int64',
+    'size_t': 'int64',
+    'ClipperFillRule': 'ClipperFillRule',
+    'ClipperClipType': 'ClipperClipType',
+    'CLipperPathType': 'ClipperPathType',
+    'ClipperJoinType': 'ClipperJoinType',
+    'ClipperEndType': 'ClipperEndType',
+    'ClipperPointInPolygonResult': 'ClipperPointInPolygonResult'
+}
+
 
 @dataclass
 class Type:
@@ -38,25 +53,22 @@ def parse_decl(node: c_ast.Decl) -> Type:
     return Type(name, name_type, is_ptr, is_struct)
 
 
-def template(struct_name, func_name, parameters, return_type):
-    return f"""
-    func (clipperObj {struct_name}) {func_name}({parameters}) {return_type} {{
-        
-        return {return_type} // not actually, rather object
-    }}
-    """
+def is_complex_type_name(name: str):
+    try:
+        types_mapping[name]
+
+        return False
+    except KeyError:
+        return True
 
 
 def update_name_sign(param: Type):
-    simple = {
-        'int64_t': 'int64',
-        'double': 'float64',
-        'int': 'int64',
-        'int64': 'int64'
-    }
+    """
+    updates param type_name for function signature
+    """
 
     try:
-        return simple[param.type_name]
+        return types_mapping[param.type_name]
     except KeyError:
         return param.type_name
 
@@ -66,15 +78,8 @@ def update_name_pass(param: Type):
     update_name returns the same name if it is not compound type, otherwise adds call to inner C struct
     """
 
-    simple = {
-        'int64_t': 'int64',
-        'double': 'float64',
-        'int': 'int64',
-        'int64': 'int64',
-    }
-
     try:
-        simple[param.type_name]
+        types_mapping[param.type_name]
 
         return f"C.{param.type_name}({param.name})"
     except KeyError:
@@ -88,7 +93,7 @@ def is_constructor(name: str) -> bool:
     return len(name.split("_")) == 2
 
 
-def template_constructor(functype: Type, params: List[Type]):
+def template_constructor(functype: Type, params: List[Type], has_mem: bool):
     param_signature = ", ".join([
         f"{p.name} {update_name_sign(p)}" for p in params
     ])
@@ -96,53 +101,100 @@ def template_constructor(functype: Type, params: List[Type]):
     param_call = ", ".join([update_name_pass(p) for p in params])
 
     return f"""
-    func New_{functype.name}({param_signature}) *{functype.type_name} {{
-        var mem unsafe.Pointer = C.malloc(0)
+    func {functype.name.capitalize()}({param_signature}) {"*" if functype.is_ptr else ""}{functype.type_name} {{
+        {"var mem unsafe.Pointer = C.malloc(0)" if has_mem else ""}
 
         return &{functype.type_name}{{
-            P: C.{functype.name}(mem, {param_call}),
+            P: C.{functype.name}({"mem, " if has_mem else ""}{param_call}),
         }}
+    }}
+    """
+
+
+def is_method(func: Type, params: List[Type]):
+    """
+    declaration of method: 1st non-mem argument has the same name as function name
+    clipper_pathd_rect_clip_line(void *mem, ClipperRectD)
+    """
+
+    fname = func.name.replace("_", "")
+    return len(params) > 0 and fname.lower().startswith(params[0].type_name.lower())
+
+
+def template_method(functype: Type, params: List[Type], has_mem: bool):
+    # first param is said to be struct receiver
+    receiver, params = params[0], params[1:]
+
+    param_signature = ", ".join([
+        f"{p.name} {update_name_sign(p)}" for p in params
+    ])
+
+    param_call = ", ".join([f"{receiver.name}.P"] +
+                           [update_name_pass(p) for p in params])
+
+    is_complex_return_type = is_complex_type_name(functype.type_name)
+
+    if functype.type_name == "void":
+        ret_templ = f"""C.{functype.name}({"mem, " if has_mem else ""}{param_call})"""
+    elif is_complex_return_type:
+        ret_templ = f"""
+        return {"&" if functype.is_ptr else ""}{functype.type_name}{{
+            P: C.{functype.name}({"mem, " if has_mem else ""}{param_call}),
+        }}
+        """
+    else:
+        ret_templ = f"""return {update_name_sign(functype)}(C.{functype.name}({"mem, " if has_mem else ""}{param_call}))"""
+
+    return f"""
+    func ({receiver.name} *{receiver.type_name}){functype.name.capitalize()}({param_signature}) {"*" if functype.is_ptr else ""}{update_name_sign(functype) if functype.type_name != "void" else ""} {{
+        {"var mem unsafe.Pointer = C.malloc(0)" if has_mem else ""}
+
+        {ret_templ}
     }}
     """
 
 
 class FuncDefVisitor(c_ast.NodeVisitor):
     def visit_FuncDecl(self, node):
-        # print(node)
-        # print(node.type)
-
         if type(node.type) == c_ast.PtrDecl and type(node.type.type) == c_ast.PtrDecl:
             # print(f"manually add function {node.type.type.type.declname}")
             return
 
         function = parse_decl(node)
-        if not is_constructor(function.name):
-            # skip not constructors
-            return
 
-        # print(function)
-        args = node.args
-
-        if not args:
+        if not node.args:
             return
 
         params = []
+        has_mem = False
+        any_broken = False
 
-        for param in args:
+        for param in node.args:
             if param.name == 'mem':
+                has_mem = True
                 continue
 
             parameter = parse_decl(param)
 
-            # print('\t', parameter)
+            if parameter == None:
+                any_broken = True
 
             params.append(parameter)
 
-        # print(args)
+        # we have parsed function signature, now decide it is constructor or method and template
 
-        print(template_constructor(function, params))
+        if any_broken:
+            # print(f"broken function: {function}")
+            return
 
-        # exit(1)
+        if is_constructor(function.name):
+            # print(template_constructor(function, params, has_mem))
+            return
+        elif is_method(function, params):
+            # print("method", function.name)
+            print(template_method(function, params, has_mem))
+
+            # exit(1)
 
 
 def show_func_defs(filename):

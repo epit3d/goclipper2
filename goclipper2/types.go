@@ -48,54 +48,62 @@ type ClipperPolyTreeD struct {
 	P *C.ClipperPolyTreeD
 }
 
-type CFillRule int
+type ClipperPointD struct {
+	P C.ClipperPointD
+}
+
+type ClipperPoint64 struct {
+	P C.ClipperPoint64
+}
+
+type ClipperFillRule int
 
 const (
-	EvenOdd  CFillRule = 0
-	NonZero  CFillRule = 1
-	Positive CFillRule = 2
-	Negative CFillRule = 3
+	EvenOdd  ClipperFillRule = 0
+	NonZero  ClipperFillRule = 1
+	Positive ClipperFillRule = 2
+	Negative ClipperFillRule = 3
 )
 
-type CClipType int
+type ClipperClipType int
 
 const (
-	None         CClipType = 0
-	Intersection CClipType = 1
-	Union        CClipType = 2
-	Difference   CClipType = 3
-	XOR          CClipType = 4
+	None         ClipperClipType = 0
+	Intersection ClipperClipType = 1
+	Union        ClipperClipType = 2
+	Difference   ClipperClipType = 3
+	XOR          ClipperClipType = 4
 )
 
-type CPathType string
+type ClipperPathType int
 
 const (
-	Subject CPathType = "Subject"
-	Clip    CPathType = "Clip"
+	Subject ClipperPathType = 0
+	Clip    ClipperPathType = 1
 )
 
-type CJoinType string
+type ClipperJoinType int
 
 const (
-	SquareJoin CJoinType = "SquareJoin"
-	RoundJoin  CJoinType = "RoundJoin"
-	MiterJoin  CJoinType = "MiterJoin"
+	SquareJoin ClipperJoinType = 0
+	RoundJoin  ClipperJoinType = 1
+	MiterJoin  ClipperJoinType = 2
 )
 
-type CEndType string
+type ClipperEndType int
 
 const (
-	PolygonEnd CEndType = "PolygonEnd"
-	JoinedEnd  CEndType = "JoinedEnd"
-	ButtEnd    CEndType = "ButtEnd"
-	SquareEnd  CEndType = "SquareEnd"
-	RoundEnd   CEndType = "RoundEnd"
+	PolygonEnd ClipperEndType = 0
+	JoinedEnd  ClipperEndType = 1
+	ButtEnd    ClipperEndType = 2
+	SquareEnd  ClipperEndType = 3
+	RoundEnd   ClipperEndType = 4
 )
 
-type CPointInPolygonResult string
+type ClipperPointInPolygonResult int
 
 const (
-	IsOn      CPointInPolygonResult = "IsOn"
-	IsInside  CPointInPolygonResult = "IsInside"
-	IsOutside CPointInPolygonResult = "IsOutside"
+	IsOn      ClipperPointInPolygonResult = 0
+	IsInside  ClipperPointInPolygonResult = 1
+	IsOutside ClipperPointInPolygonResult = 2
 )

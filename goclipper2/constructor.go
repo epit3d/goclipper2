@@ -5,7 +5,7 @@ package goclipper2
 import "C"
 import "unsafe"
 
-func New_clipper_path64() *ClipperPath64 {
+func Clipper_path64() *ClipperPath64 {
 	var mem unsafe.Pointer = C.malloc(0)
 
 	return &ClipperPath64{
@@ -13,7 +13,7 @@ func New_clipper_path64() *ClipperPath64 {
 	}
 }
 
-func New_clipper_pathd() *ClipperPathD {
+func Clipper_pathd() *ClipperPathD {
 	var mem unsafe.Pointer = C.malloc(0)
 
 	return &ClipperPathD{
@@ -21,7 +21,7 @@ func New_clipper_pathd() *ClipperPathD {
 	}
 }
 
-func New_clipper_paths64() *ClipperPaths64 {
+func Clipper_paths64() *ClipperPaths64 {
 	var mem unsafe.Pointer = C.malloc(0)
 
 	return &ClipperPaths64{
@@ -29,7 +29,7 @@ func New_clipper_paths64() *ClipperPaths64 {
 	}
 }
 
-func New_clipper_pathsd() *ClipperPathsD {
+func Clipper_pathsd() *ClipperPathsD {
 	var mem unsafe.Pointer = C.malloc(0)
 
 	return &ClipperPathsD{
@@ -37,7 +37,7 @@ func New_clipper_pathsd() *ClipperPathsD {
 	}
 }
 
-func New_clipper_polytree64(parent ClipperPolyTree64) *ClipperPolyTree64 {
+func Clipper_polytree64(parent ClipperPolyTree64) *ClipperPolyTree64 {
 	var mem unsafe.Pointer = C.malloc(0)
 
 	return &ClipperPolyTree64{
@@ -45,7 +45,7 @@ func New_clipper_polytree64(parent ClipperPolyTree64) *ClipperPolyTree64 {
 	}
 }
 
-func New_clipper_polytreed(parent ClipperPolyTreeD) *ClipperPolyTreeD {
+func Clipper_polytreed(parent ClipperPolyTreeD) *ClipperPolyTreeD {
 	var mem unsafe.Pointer = C.malloc(0)
 
 	return &ClipperPolyTreeD{
@@ -53,7 +53,7 @@ func New_clipper_polytreed(parent ClipperPolyTreeD) *ClipperPolyTreeD {
 	}
 }
 
-func New_clipper_rect64(left int64, top int64, right int64, bottom int64) *ClipperRect64 {
+func Clipper_rect64(left int64, top int64, right int64, bottom int64) *ClipperRect64 {
 	var mem unsafe.Pointer = C.malloc(0)
 
 	return &ClipperRect64{
@@ -61,7 +61,7 @@ func New_clipper_rect64(left int64, top int64, right int64, bottom int64) *Clipp
 	}
 }
 
-func New_clipper_rectd(left float64, top float64, right float64, bottom float64) *ClipperRectD {
+func Clipper_rectd(left float64, top float64, right float64, bottom float64) *ClipperRectD {
 	var mem unsafe.Pointer = C.malloc(0)
 
 	return &ClipperRectD{
@@ -69,7 +69,7 @@ func New_clipper_rectd(left float64, top float64, right float64, bottom float64)
 	}
 }
 
-func New_clipper_clipper64() *ClipperClipper64 {
+func Clipper_clipper64() *ClipperClipper64 {
 	var mem unsafe.Pointer = C.malloc(0)
 
 	return &ClipperClipper64{
@@ -77,7 +77,7 @@ func New_clipper_clipper64() *ClipperClipper64 {
 	}
 }
 
-func New_clipper_clipperd(precision int64) *ClipperClipperD {
+func Clipper_clipperd(precision int64) *ClipperClipperD {
 	var mem unsafe.Pointer = C.malloc(0)
 
 	return &ClipperClipperD{
@@ -85,7 +85,7 @@ func New_clipper_clipperd(precision int64) *ClipperClipperD {
 	}
 }
 
-func New_clipper_clipperoffset(miter_limit float64, arc_tolerance float64, preserve_collinear int64, reverse_solution int64) *ClipperClipperOffset {
+func Clipper_clipperoffset(miter_limit float64, arc_tolerance float64, preserve_collinear int64, reverse_solution int64) *ClipperClipperOffset {
 	var mem unsafe.Pointer = C.malloc(0)
 
 	return &ClipperClipperOffset{
