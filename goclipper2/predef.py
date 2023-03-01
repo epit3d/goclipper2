@@ -1,5 +1,12 @@
 # contains predefined functions
 
+header = '''package goclipper2
+
+// #cgo LDFLAGS: /usr/local/lib/libclipper2c.so
+// #include "clipper2c/clipper2c.h"
+import "C"
+import "unsafe"'''
+
 methods = {
     'clipper_path64_to_points': """\
     func (path *ClipperPath64) Clipper_path64_to_points() []ClipperPoint64 {\n\

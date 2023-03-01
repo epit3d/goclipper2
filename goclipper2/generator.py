@@ -1,7 +1,9 @@
+import warnings
+import os
 from pycparser import c_ast, parse_file
 from typing import Tuple, List
 from dataclasses import dataclass
-from predef import methods
+from predef import methods, header
 
 # types_mapping define how each type of C program is treated inside golang templating
 types_mapping = {
@@ -100,7 +102,7 @@ def template_constructor(functype: Type, params: List[Type], has_mem: bool):
     ])
 
     param_call = ", ".join(
-        ["*" if p.is_ptr else "" + update_name_pass(p) for p in params])
+        [("*" if p.is_ptr and not is_complex_type_name(p.type_name) else "") + update_name_pass(p) for p in params])
 
     return f"""
     func {functype.name.capitalize()}({param_signature}) {"*" if functype.is_ptr else ""}{functype.type_name} {{
@@ -157,15 +159,26 @@ def template_method(functype: Type, params: List[Type], has_mem: bool):
 
 
 class FuncDefVisitor(c_ast.NodeVisitor):
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.constructor_writer = open('constructor.go', "w")
+        self.methods_writer = open('methods.go', 'w')
+
+        self.constructor_writer.write(header)
+        self.methods_writer.write(header)
+
     def visit_FuncDecl(self, node):
         if type(node.type) == c_ast.PtrDecl and type(node.type.type) == c_ast.PtrDecl:
-            # print(f"manually add function {node.type.type.type.declname}")
+            warnings.warn(
+                f"manually add function: {node.type.type.type.declname}")
             return
 
         function = parse_decl(node)
 
+        # try and check function in predefined
         try:
-            print(methods[function.name])
+            self.methods_writer.write(methods[function.name])
             return
         except KeyError:
             ...
@@ -192,17 +205,19 @@ class FuncDefVisitor(c_ast.NodeVisitor):
         # we have parsed function signature, now decide it is constructor or method and template
 
         if any_broken:
-            # print(f"broken function: {function}")
+            warnings.warn(f"broken function: {function}")
             return
 
         if is_constructor(function.name):
-            # print(template_constructor(function, params, has_mem))
-            return
+            self.constructor_writer.write(
+                template_constructor(function, params, has_mem))
         elif is_method(function, params):
-            # print("method", function.name)
-            print(template_method(function, params, has_mem))
+            self.methods_writer.write(
+                template_method(function, params, has_mem))
 
-            # exit(1)
+    def close(self):
+        self.constructor_writer.close()
+        self.methods_writer.close()
 
 
 def show_func_defs(filename):
@@ -214,6 +229,8 @@ def show_func_defs(filename):
 
     v = FuncDefVisitor()
     v.visit(ast)
+
+    v.close()
 
 
 if __name__ == "__main__":
