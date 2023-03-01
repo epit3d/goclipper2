@@ -8,109 +8,112 @@ import "C"
 import "unsafe"'''
 
 methods = {
-    'clipper_path64_to_points': """\
-    func (path *ClipperPath64) Clipper_path64_to_points() []ClipperPoint64 {\n\
-	\tvar res []ClipperPoint64\n\
-	\tl := path.Clipper_path64_length()\n\
-	\tvar i int64\n\
-    \t\n\
-	\tfor i = 0; i < l; i++ {\n\
-	\t\tn := path.Clipper_path64_get_point(i)\n\
-	\t\tres = append(res, n)\n\
-	\t}\n\
-	\treturn res\n\
-    }\n\
-    """,
+    'clipper_path64_to_points': '''
+    func (path *path64) ToPoints() []point64 {
+		var res []point64
+		l := path.Length()
+		var i int64
 
-    'clipper_pathd_to_points': """\
-    func (path *ClipperPathD) Clipper_pathd_to_points() []ClipperPointD {\n\
-	\tvar res []ClipperPointD\n\
-	\tl := path.Clipper_pathd_length()\n\
-	\tvar i int64\n\
-    \t\n\
-	\tfor i = 0; i < l; i++ {\n\
-	\t\tn := path.Clipper_pathd_get_point(i)\n\
-	\t\tres = append(res, n)\n\
-	\t}\n\
-	\treturn res\n\
-    }\n\
-    """,
+		for i = 0; i < l; i++ {
+			n := path.GetPoint(i)
+			res = append(res, n)
+		}
+		return res
+	}
+    ''',
+
+    'clipper_pathd_to_points': '''
+    func (path *pathD) ToPoints() []pointD {
+		var res []pointD
+		l := path.Length()
+		var i int64
+
+		for i = 0; i < l; i++ {
+			n := path.GetPoint(i)
+			res = append(res, n)
+		}
+		return res
+	}
+	''',
 
     'clipper_paths64_lengths': """
-    func (paths *ClipperPaths64) Clipper_paths64_lengths() []int64 {
+    func (paths *paths64) Lengths() []int64 {
 		var lengths []int64
 
-		l := paths.Clipper_paths64_length()
+		l := paths.Length()
 
 		var i int64
 		for i = 0; i < l; i++ {
-			lengths = append(lengths, paths.Clipper_paths64_get_path(i).Clipper_path64_length())
+			lengths = append(lengths, paths.GetPath(i).Length())
 		}
 
 		return lengths
-	}""",
+	}
+    """,
 
     'clipper_pathsd_lengths': """
-    func (paths *ClipperPathsD) Clipper_pathsd_lengths() []int64 {
+    func (paths *pathsD) Lengths() []int64 {
 		var lengths []int64
 
-		l := paths.Clipper_pathsd_length()
+		l := paths.Length()
 
 		var i int64
 		for i = 0; i < l; i++ {
-			lengths = append(lengths, paths.Clipper_pathsd_get_path(i).Clipper_pathd_length())
+			lengths = append(lengths, paths.GetPath(i).Length())
 		}
 
 		return lengths
-	}""",
+	}
+	""",
 
     'clipper_rect64_to_struct': """
-    func (rect *ClipperRect64) Clipper_rect64_to_struct() ClipperRect64 {
+    func (rect *rect64) ToStruct() rect64 {
 		return *rect
-	}""",
-
-    'clipper_rectd_to_struct': """
-    func (rect *ClipperRectD) Clipper_rectd_to_struct() ClipperRectD {
+	}
+	""",
+    
+	'clipper_rectd_to_struct': """
+    func (rect *rectD) ToStruct() rectD {
 		return *rect
 	}
     """,
 
     'clipper_path64_scale': """
-    func (path *ClipperPath64) Clipper_path64_scale(sx float64, sy float64) (*ClipperPath64, int) {
+    func (path *path64) Scale(sx float64, sy float64) (*path64, int) {
 		mem := C.malloc(0)
 		error_code := C.int(0)
 
-		return &ClipperPath64{
+		return &path64{
 			P: C.clipper_path64_scale(mem, path.P, C.double(sx), C.double(sy), &error_code),
 		}, int(error_code)
 	}""",
 
     'clipper_pathd_scale': """
-		func (path *ClipperPathD) Clipper_pathd_scale(sx float64, sy float64) (*ClipperPathD, int) {
+		func (path *pathD) Scale(sx float64, sy float64) (*pathD, int) {
 		mem := C.malloc(0)
 		error_code := C.int(0)
 
-		return &ClipperPathD{
+		return &pathD{
 			P: C.clipper_pathd_scale(mem, path.P, C.double(sx), C.double(sy), &error_code),
 		}, int(error_code)
 	}""",
 
     'clipper_paths64_scale': """
-    func (path *ClipperPaths64) Clipper_paths64_scale(sx float64, sy float64) (*ClipperPaths64, int) {
+    func (path *paths64) Scale(sx float64, sy float64) (*paths64, int) {
 		mem := C.malloc(0)
 		error_code := C.int(0)
 
-		return &ClipperPaths64{
+		return &paths64{
 			P: C.clipper_paths64_scale(mem, path.P, C.double(sx), C.double(sy), &error_code),
 		}, int(error_code)
 	}""",
 
     'clipper_pathsd_scale': """
-		func (path *ClipperPathsD) Clipper_pathsd_scale(sx float64, sy float64) (*ClipperPathsD, int) {
+		func (path *pathsD) Scale(sx float64, sy float64) (*pathsD, int) {
 		mem := C.malloc(0)
 		error_code := C.int(0)
 
-		return &ClipperPathsD{
+		return &pathsD{
 			P: C.clipper_pathsd_scale(mem, path.P, C.double(sx), C.double(sy), &error_code),
 		}, int(error_code)
 	}""",

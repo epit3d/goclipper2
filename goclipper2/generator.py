@@ -73,7 +73,7 @@ def update_name_sign(param: Type):
     try:
         return types_mapping[param.type_name]
     except KeyError:
-        return param.type_name
+        return trim_typename(param.type_name)
 
 
 def update_name_pass(param: Type):
@@ -87,6 +87,31 @@ def update_name_pass(param: Type):
         return f"C.{param.type_name}({param.name})"
     except KeyError:
         return f"{param.name}.P"
+
+
+def trim_funcname_constructor(name: str):
+    # constructor name is clipper_<...>
+    return to_camel_case(name.removeprefix('clipper_'))
+
+
+def trim_typename(name: str):
+    # decapitalize
+    r = name.removeprefix('Clipper')
+    return r[0].lower() + r[1:]
+
+
+def to_camel_case(st):
+    # temp = st.split('_')
+
+    # # joining result
+    # return temp[0] + ''.join(ele.title() for ele in temp[1:])
+    return ''.join(x for x in st.title() if x.isalnum())
+    # return output[0].lower() + output[1:]
+
+
+def trim_funcname_method(name: str):
+    # funcname is clipper_<typename>_<...>
+    return to_camel_case("_".join(name.split("_")[2:]))
 
 
 def is_constructor(name: str) -> bool:
@@ -105,10 +130,10 @@ def template_constructor(functype: Type, params: List[Type], has_mem: bool):
         [("*" if p.is_ptr and not is_complex_type_name(p.type_name) else "") + update_name_pass(p) for p in params])
 
     return f"""
-    func {functype.name.capitalize()}({param_signature}) {"*" if functype.is_ptr else ""}{functype.type_name} {{
+    func {trim_funcname_constructor(functype.name)}({param_signature}) {"*" if functype.is_ptr else ""}{trim_typename(functype.type_name)} {{
         {"var mem unsafe.Pointer = C.malloc(0)" if has_mem else ""}
 
-        return &{functype.type_name}{{
+        return &{trim_typename(functype.type_name)}{{
             P: C.{functype.name}({"mem, " if has_mem else ""}{param_call}),
         }}
     }}
@@ -142,7 +167,7 @@ def template_method(functype: Type, params: List[Type], has_mem: bool):
         ret_templ = f"""C.{functype.name}({"mem, " if has_mem else ""}{param_call})"""
     elif is_complex_return_type:
         ret_templ = f"""
-        return {"&" if functype.is_ptr else ""}{functype.type_name}{{
+        return {"&" if functype.is_ptr else ""}{trim_typename(functype.type_name)}{{
             P: C.{functype.name}({"mem, " if has_mem else ""}{param_call}),
         }}
         """
@@ -150,7 +175,7 @@ def template_method(functype: Type, params: List[Type], has_mem: bool):
         ret_templ = f"""return {update_name_sign(functype)}(C.{functype.name}({"mem, " if has_mem else ""}{param_call}))"""
 
     return f"""
-    func ({receiver.name} *{receiver.type_name}){functype.name.capitalize()}({param_signature}) {"*" if functype.is_ptr else ""}{update_name_sign(functype) if functype.type_name != "void" else ""} {{
+    func ({receiver.name} *{trim_typename(receiver.type_name)}){trim_funcname_method(functype.name)}({param_signature}) {"*" if functype.is_ptr else ""}{update_name_sign(functype) if functype.type_name != "void" else ""} {{
         {"var mem unsafe.Pointer = C.malloc(0)" if has_mem else ""}
 
         {ret_templ}

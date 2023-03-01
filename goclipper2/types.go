@@ -1,59 +1,51 @@
 package goclipper2
 
 // #cgo LDFLAGS: /usr/local/lib/libclipper2c.so
-// #include "clipper2c/clipper2c.h"
+// #include "/usr/local/include/clipper2c/clipper2c.h"
 import "C"
 
-type ClipperClipper64 struct {
+type clipper64 struct {
 	P *C.ClipperClipper64
 }
 
-type ClipperClipperD struct {
+type clipperD struct {
 	P *C.ClipperClipperD
 }
 
-type ClipperClipperOffset struct {
+type clipperOffset struct {
 	P *C.ClipperClipperOffset
 }
 
-type ClipperPath64 struct {
+type path64 struct {
 	P *C.ClipperPath64
 }
 
-type ClipperPathD struct {
+type pathD struct {
 	P *C.ClipperPathD
 }
 
-type ClipperPaths64 struct {
+type paths64 struct {
 	P *C.ClipperPaths64
 }
 
-type ClipperPathsD struct {
+type pathsD struct {
 	P *C.ClipperPathsD
 }
 
-type ClipperRect64 struct {
+type rect64 struct {
 	P *C.ClipperRect64
 }
 
-type ClipperRectD struct {
+type rectD struct {
 	P *C.ClipperRectD
 }
 
-type ClipperPolyTree64 struct {
+type polyTree64 struct {
 	P *C.ClipperPolyTree64
 }
 
-type ClipperPolyTreeD struct {
+type polyTreeD struct {
 	P *C.ClipperPolyTreeD
-}
-
-type ClipperPointD struct {
-	P C.ClipperPointD
-}
-
-type ClipperPoint64 struct {
-	P C.ClipperPoint64
 }
 
 type ClipperFillRule int
@@ -107,3 +99,29 @@ const (
 	IsInside  ClipperPointInPolygonResult = 1
 	IsOutside ClipperPointInPolygonResult = 2
 )
+
+type pointD struct {
+	P C.ClipperPointD
+}
+
+func PointD(x, y float64) *pointD {
+	return &pointD{
+		P: C.ClipperPointD{
+			x: C.double(x),
+			y: C.double(y),
+		},
+	}
+}
+
+type point64 struct {
+	P C.ClipperPoint64
+}
+
+func Point64(x, y int64) *point64 {
+	return &point64{
+		P: C.ClipperPoint64{
+			x: C.int64_t(x),
+			y: C.int64_t(y),
+		},
+	}
+}
