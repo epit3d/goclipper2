@@ -12,6 +12,7 @@ types_mapping = {
     'int': 'int64',
     'int64': 'int64',
     'size_t': 'int64',
+    'char': 'string',
     'ClipperFillRule': 'ClipperFillRule',
     'ClipperClipType': 'ClipperClipType',
     'CLipperPathType': 'ClipperPathType',
@@ -58,6 +59,8 @@ def parse_decl(node: c_ast.Decl) -> Type:
 
 def is_complex_type_name(name: str):
     try:
+        if name == 'char':
+            return True
         types_mapping[name]
 
         return False
@@ -84,20 +87,24 @@ def update_name_pass(param: Type):
     try:
         types_mapping[param.type_name]
 
+        if param.type_name == "char":
+            param.type_name = "CString"
+
         return f"C.{param.type_name}({param.name})"
     except KeyError:
-        return f"{param.name}.P"
+        return f"{param.name}.p"
 
 
 def trim_funcname_constructor(name: str):
     # constructor name is clipper_<...>
-    return to_camel_case(name.removeprefix('clipper_'))
+    return "New" + to_camel_case(name.removeprefix('clipper_'))
 
 
 def trim_typename(name: str):
     # decapitalize
     r = name.removeprefix('Clipper')
-    return r[0].lower() + r[1:]
+    # return r[0].lower() + r[1:]
+    return r
 
 
 def to_camel_case(st):
@@ -114,11 +121,20 @@ def trim_funcname_method(name: str):
     return to_camel_case("_".join(name.split("_")[2:]))
 
 
-def is_constructor(name: str) -> bool:
+def is_constructor(func: Type, params: List[Type]) -> bool:
     """
     is_constructor checks whether function name matches pattern for constructor function
     """
-    return len(name.split("_")) == 2
+
+    exceptions = [
+        'clipper_path64_ellipse',
+        'clipper_pathd_ellipse',
+        'clipper_path64_of_string',
+        'clipper_pathd_of_string'
+    ]
+
+    return len(func.name.split("_")) == 2 or func.name in exceptions
+    # return not any([func.type_name == p.type_name for p in params])
 
 
 def template_constructor(functype: Type, params: List[Type], has_mem: bool):
@@ -134,7 +150,7 @@ def template_constructor(functype: Type, params: List[Type], has_mem: bool):
         {"var mem unsafe.Pointer = C.malloc(0)" if has_mem else ""}
 
         return &{trim_typename(functype.type_name)}{{
-            P: C.{functype.name}({"mem, " if has_mem else ""}{param_call}),
+            p: C.{functype.name}({"mem, " if has_mem else ""}{param_call}),
         }}
     }}
     """
@@ -158,7 +174,7 @@ def template_method(functype: Type, params: List[Type], has_mem: bool):
         f"{p.name} {update_name_sign(p)}" for p in params
     ])
 
-    param_call = ", ".join([f"{receiver.name}.P"] +
+    param_call = ", ".join([f"{receiver.name}.p"] +
                            [update_name_pass(p) for p in params])
 
     is_complex_return_type = is_complex_type_name(functype.type_name)
@@ -168,7 +184,7 @@ def template_method(functype: Type, params: List[Type], has_mem: bool):
     elif is_complex_return_type:
         ret_templ = f"""
         return {"&" if functype.is_ptr else ""}{trim_typename(functype.type_name)}{{
-            P: C.{functype.name}({"mem, " if has_mem else ""}{param_call}),
+            p: C.{functype.name}({"mem, " if has_mem else ""}{param_call}),
         }}
         """
     else:
@@ -183,15 +199,62 @@ def template_method(functype: Type, params: List[Type], has_mem: bool):
     """
 
 
+def is_delete(func: Type, params: List[Type]):
+    """
+    clipper_delete_<funcname>
+    """
+    return func.name.startswith('clipper_delete_')
+
+
+def template_delete(functype: Type, params: List[Type], has_mem: bool):
+    # we should have only one parameter
+    param = params[0]
+
+    return f"""
+    func (p *{trim_typename(param.type_name)}) Delete() {{
+        C.{functype.name}(p.p)
+    }}
+    """
+
+
+def is_destruct(func: Type, params: List[Type]):
+    """
+    clipper_destruct_<funcname>
+    """
+    return func.name.startswith('clipper_destruct_')
+
+
+def template_destruct(functype: Type, params: List[Type], has_mem: bool):
+    # we should have only one parameter
+    param = params[0]
+
+    return f"""
+    func (p *{trim_typename(param.type_name)}) Destruct() {{
+        C.{functype.name}(p.p)
+    }}
+    """
+
+
+def is_size(func: Type, params: List[Type]):
+    """
+    clipper_<funcname>_size
+    """
+    return func.name.endswith('_size')
+
+
 class FuncDefVisitor(c_ast.NodeVisitor):
     def __init__(self) -> None:
         super().__init__()
 
         self.constructor_writer = open('constructor.go', "w")
         self.methods_writer = open('methods.go', 'w')
+        self.delete_writer = open('delete.go', 'w')
+        self.destruct_writer = open('desctruct.go', 'w')
 
         self.constructor_writer.write(header)
         self.methods_writer.write(header)
+        self.delete_writer.write(header)
+        self.destruct_writer.write(header)
 
     def visit_FuncDecl(self, node):
         if type(node.type) == c_ast.PtrDecl and type(node.type.type) == c_ast.PtrDecl:
@@ -209,7 +272,9 @@ class FuncDefVisitor(c_ast.NodeVisitor):
             ...
 
         if not node.args:
-            return
+            node.args = []
+            # warnings.warn(f"no args function: {function}")
+            # return
 
         params = []
         has_mem = False
@@ -233,16 +298,29 @@ class FuncDefVisitor(c_ast.NodeVisitor):
             warnings.warn(f"broken function: {function}")
             return
 
-        if is_constructor(function.name):
+        if is_constructor(function, params):
             self.constructor_writer.write(
                 template_constructor(function, params, has_mem))
         elif is_method(function, params):
             self.methods_writer.write(
                 template_method(function, params, has_mem))
+        elif is_delete(function, params):
+            self.delete_writer.write(
+                template_delete(function, params, has_mem))
+        elif is_destruct(function, params):
+            self.destruct_writer.write(
+                template_destruct(function, params, has_mem))
+        elif is_size(function, params):
+            # we skip size allocation of sizes
+            return
+        else:
+            warnings.warn(f"unknown method {function}")
 
     def close(self):
         self.constructor_writer.close()
         self.methods_writer.close()
+        self.delete_writer.close()
+        self.destruct_writer.close()
 
 
 def show_func_defs(filename):
@@ -259,6 +337,6 @@ def show_func_defs(filename):
 
 
 if __name__ == "__main__":
-    filename = '/home/leo/spycer/goclipper2/vendor/clipper2c/include/clipper2c/clipper2c.h'
+    filename = '../third_party/clipper2c/include/clipper2c/clipper2c.h'
 
     show_func_defs(filename)
