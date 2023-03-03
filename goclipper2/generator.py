@@ -3,7 +3,7 @@ import os
 from pycparser import c_ast, parse_file
 from typing import Tuple, List
 from dataclasses import dataclass
-from predef import methods, header
+from predef import methods, header, constructors, header_no_unsafe
 
 # types_mapping define how each type of C program is treated inside golang templating
 types_mapping = {
@@ -242,6 +242,54 @@ def is_size(func: Type, params: List[Type]):
     return func.name.endswith('_size')
 
 
+def is_rect_clip(func: Type, params: List[Type]):
+    """
+    clipper_<funcname>_rect_clip
+    clipper_<funcname>_rect_clip_line
+    clipper_<funcname>_rect_clip_lines
+    """
+    return any(func.name.endswith(suffix) for suffix in [
+        '_rect_clip',
+        '_rect_clip_line',
+        '_rect_clip_lines'
+    ])
+
+
+def template_rect_clip(functype: Type, params: List[Type], has_mem: bool):
+    # for this pattern receiver is 3rd argument in signature
+    # print(params)
+    prev_params = params[:]
+    receiver = params.pop(1)
+    # receiver, params = params[2], params[:2] + params[3:]
+
+    param_signature = ", ".join([
+        f"{p.name} {update_name_sign(p)}" for p in params
+    ])
+
+    param_call = ", ".join([update_name_pass(p) for p in prev_params])
+
+    is_complex_return_type = is_complex_type_name(functype.type_name)
+
+    if functype.type_name == "void":
+        ret_templ = f"""C.{functype.name}({"mem, " if has_mem else ""}{param_call})"""
+    elif is_complex_return_type:
+        ret_templ = f"""
+        return {"&" if functype.is_ptr else ""}{trim_typename(functype.type_name)}{{
+            p: C.{functype.name}({"mem, " if has_mem else ""}{param_call}),
+        }}
+        """
+    else:
+        ret_templ = f"""return {update_name_sign(functype)}(C.{functype.name}({"mem, " if has_mem else ""}{param_call}))"""
+
+    return f"""
+    func ({receiver.name} *{trim_typename(receiver.type_name)}){trim_funcname_method(functype.name)}({param_signature}) {"*" if functype.is_ptr else ""}{update_name_sign(functype) if functype.type_name != "void" else ""} {{
+        {"var mem unsafe.Pointer = C.malloc(0)" if has_mem else ""}
+
+        {ret_templ}
+    }}
+    """
+
+
 class FuncDefVisitor(c_ast.NodeVisitor):
     def __init__(self) -> None:
         super().__init__()
@@ -250,16 +298,25 @@ class FuncDefVisitor(c_ast.NodeVisitor):
         self.methods_writer = open('methods.go', 'w')
         self.delete_writer = open('delete.go', 'w')
         self.destruct_writer = open('desctruct.go', 'w')
+        self.rect_clip_writer = open('rect_clip.go', 'w')
 
         self.constructor_writer.write(header)
         self.methods_writer.write(header)
-        self.delete_writer.write(header)
-        self.destruct_writer.write(header)
+        self.delete_writer.write(header_no_unsafe)
+        self.destruct_writer.write(header_no_unsafe)
+        self.rect_clip_writer.write(header)
 
     def visit_FuncDecl(self, node):
         if type(node.type) == c_ast.PtrDecl and type(node.type.type) == c_ast.PtrDecl:
-            warnings.warn(
-                f"manually add function: {node.type.type.type.declname}")
+            # try and check function in predefined
+            try:
+                self.methods_writer.write(
+                    methods[node.type.type.type.declname])
+                return
+            except KeyError:
+                warnings.warn(
+                    f"manually add function: {node.type.type.type.declname}")
+
             return
 
         function = parse_decl(node)
@@ -271,10 +328,15 @@ class FuncDefVisitor(c_ast.NodeVisitor):
         except KeyError:
             ...
 
+        # try and check if constructor is predefined
+        try:
+            self.constructor_writer.write(constructors[function.name])
+            return
+        except KeyError:
+            ...
+
         if not node.args:
             node.args = []
-            # warnings.warn(f"no args function: {function}")
-            # return
 
         params = []
         has_mem = False
@@ -313,6 +375,9 @@ class FuncDefVisitor(c_ast.NodeVisitor):
         elif is_size(function, params):
             # we skip size allocation of sizes
             return
+        elif is_rect_clip(function, params):
+            self.rect_clip_writer.write(
+                template_rect_clip(function, params, has_mem))
         else:
             warnings.warn(f"unknown method {function}")
 
@@ -321,6 +386,7 @@ class FuncDefVisitor(c_ast.NodeVisitor):
         self.methods_writer.close()
         self.delete_writer.close()
         self.destruct_writer.close()
+        self.rect_clip_writer.close()
 
 
 def show_func_defs(filename):
