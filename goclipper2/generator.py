@@ -129,8 +129,6 @@ def is_constructor(func: Type, params: List[Type]) -> bool:
     exceptions = [
         'clipper_path64_ellipse',
         'clipper_pathd_ellipse',
-        'clipper_path64_of_string',
-        'clipper_pathd_of_string'
     ]
 
     return len(func.name.split("_")) == 2 or func.name in exceptions

@@ -21,22 +21,6 @@ func NewPathd() *PathD {
 	}
 }
 
-func NewPath64OfString(str string) *Path64 {
-	var mem unsafe.Pointer = C.malloc(0)
-
-	return &Path64{
-		p: C.clipper_path64_of_string(mem, C.CString(str)),
-	}
-}
-
-func NewPathdOfString(str string) *PathD {
-	var mem unsafe.Pointer = C.malloc(0)
-
-	return &PathD{
-		p: C.clipper_pathd_of_string(mem, C.CString(str)),
-	}
-}
-
 func NewPath64OfPoints(pts []Point64) *Path64 {
 	p := NewPath64()
 
@@ -141,10 +125,11 @@ func NewRectd(left float64, top float64, right float64, bottom float64) *RectD {
 }
 
 func NewClipper64() *Clipper64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(10000)
 
 	return &Clipper64{
-		p: C.clipper_clipper64(mem),
+		mem: &mem,
+		p:   C.clipper_clipper64(mem),
 	}
 }
 
@@ -157,7 +142,7 @@ func NewClipperd(precision int64) *ClipperD {
 }
 
 func NewClipperoffset(miter_limit float64, arc_tolerance float64, preserve_collinear int64, reverse_solution int64) *ClipperOffset {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(10000)
 
 	return &ClipperOffset{
 		p: C.clipper_clipperoffset(mem, C.double(miter_limit), C.double(arc_tolerance), C.int(preserve_collinear), C.int(reverse_solution)),
