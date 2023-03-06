@@ -1,125 +1,195 @@
 package goclipper2
 
 // #cgo LDFLAGS: /usr/local/lib/libclipper2c.so
-// #include "clipper2c/clipper2c.h"
+// #include "/usr/local/include/clipper2c/clipper2c.h"
 import "C"
 import (
+	"fmt"
 	"log"
-	"unsafe"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
-type CPathsD struct {
-	Path C.ClipperPathsD
+type Clipper64 struct {
+	p *C.ClipperClipper64
 }
 
-type CPointD struct {
-	Point C.ClipperPointD
+type ClipperD struct {
+	p *C.ClipperClipperD
 }
 
-type CPaths64 struct {
-	Path *C.ClipperPath64
+type ClipperOffset struct {
+	p *C.ClipperClipperOffset
 }
 
-type CPath64 struct {
-	P *C.ClipperPath64
+type Path64 struct {
+	p *C.ClipperPath64
 }
 
-func NewCPath64() *CPath64 {
-	var mem unsafe.Pointer = C.malloc(500)
+func (p *Path64) String() string {
+	pts := p.ToPoints()
 
-	res := C.clipper_path64(mem)
-
-	return &CPath64{
-		P: res,
+	pts_strings := []string{}
+	for _, pt := range pts {
+		pts_strings = append(pts_strings, pt.String())
 	}
+
+	return strings.Join(pts_strings, ", ")
 }
 
-func (p *CPath64) AddPoint(pt CPoint64) {
-	sizeBefore := C.clipper_path64_length(p.P)
-
-	C.clipper_path64_add_point(p.P, pt.Point)
-
-	sizeAfter := C.clipper_path64_length(p.P)
-	log.Println("sizes: ", sizeBefore, sizeAfter)
+func NewPath64MustOfString(str string) *Path64 {
+	p, _ := NewPath64OfString(str)
+	return p
 }
 
-func (subjects *CPaths64) BooleanOp(clips *CPaths64, clipType CClipType, fillRule CFillRule) *CPaths64 {
-	// mem := make(unsafe.Pointer, 500)
-	// var mem unsafe.Pointer
-	// C.clipper_paths64_boolean_op(mem, 0, 0, subjects.Path, clips.Path)
+func NewPath64OfString(str string) (*Path64, error) {
+	re := regexp.MustCompile("[0-9-]+")
+	int_strings := re.FindAllString(str, -1)
+	if len(int_strings)%2 == 1 {
+		log.Println(str)
+		return nil, fmt.Errorf("cannot parse path with non even # of coordinates")
+	}
 
-	return nil
+	result := NewPath64()
+	for i := 0; i < len(int_strings); i = i + 2 {
+		x, err := strconv.Atoi(int_strings[i])
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse X from '%s'", int_strings[0])
+		}
+
+		y, err := strconv.Atoi(int_strings[i+1])
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse Y from '%s'", int_strings[1])
+		}
+
+		result.AddPoint(*NewPoint64(int64(x), int64(y)))
+	}
+
+	return result, nil
 }
 
-type CPoint64 struct {
-	Point C.ClipperPoint64
+type PathD struct {
+	p *C.ClipperPathD
 }
 
-func NewCPoint64(x, y int64) CPoint64 {
-	return CPoint64{
-		Point: C.ClipperPoint64{
-			x: C.long(x),
-			y: C.long(y),
+type Paths64 struct {
+	p *C.ClipperPaths64
+}
+
+func (p *Paths64) String() string {
+	result := ""
+
+	log.Println("path lengths", p.Length())
+	for i := 0; i < int(p.Length()); i++ {
+		result += p.GetPath(int64(i)).String()
+
+		if i != int(p.Length())-1 {
+			result += "\n"
+		}
+	}
+
+	return result
+}
+
+type PathsD struct {
+	p *C.ClipperPathsD
+}
+
+type Rect64 struct {
+	p *C.ClipperRect64
+}
+
+type RectD struct {
+	p *C.ClipperRectD
+}
+
+type PolyTree64 struct {
+	p *C.ClipperPolyTree64
+}
+
+type PolyTreeD struct {
+	p *C.ClipperPolyTreeD
+}
+
+type ClipperFillRule int
+
+const (
+	EvenOdd  ClipperFillRule = 0
+	NonZero  ClipperFillRule = 1
+	Positive ClipperFillRule = 2
+	Negative ClipperFillRule = 3
+)
+
+type ClipperClipType int
+
+const (
+	None         ClipperClipType = 0
+	Intersection ClipperClipType = 1
+	Union        ClipperClipType = 2
+	Difference   ClipperClipType = 3
+	XOR          ClipperClipType = 4
+)
+
+type ClipperPathType int
+
+const (
+	Subject ClipperPathType = 0
+	Clip    ClipperPathType = 1
+)
+
+type ClipperJoinType int
+
+const (
+	SquareJoin ClipperJoinType = 0
+	RoundJoin  ClipperJoinType = 1
+	MiterJoin  ClipperJoinType = 2
+)
+
+type ClipperEndType int
+
+const (
+	PolygonEnd ClipperEndType = 0
+	JoinedEnd  ClipperEndType = 1
+	ButtEnd    ClipperEndType = 2
+	SquareEnd  ClipperEndType = 3
+	RoundEnd   ClipperEndType = 4
+)
+
+type ClipperPointInPolygonResult int
+
+const (
+	IsOn      ClipperPointInPolygonResult = 0
+	IsInside  ClipperPointInPolygonResult = 1
+	IsOutside ClipperPointInPolygonResult = 2
+)
+
+type PointD struct {
+	p C.ClipperPointD
+}
+
+func NewPointD(x, y float64) *PointD {
+	return &PointD{
+		p: C.ClipperPointD{
+			x: C.double(x),
+			y: C.double(y),
 		},
 	}
 }
 
-type CRect64 struct {
-	Rect C.ClipperRect64
+type Point64 struct {
+	p C.ClipperPoint64
 }
 
-type CRectD struct {
-	Rect C.ClipperRectD
+func (p *Point64) String() string {
+	return fmt.Sprintf("%d,%d", p.p.x, p.p.y)
 }
 
-type CFillRule string
-
-const (
-	EvenOdd  CFillRule = "EvenOdd"
-	NonZero  CFillRule = "NonZero"
-	Positive CFillRule = "Positive"
-	Negative CFillRule = "Negative"
-)
-
-type CClipType string
-
-const (
-	None         CClipType = "None"
-	Intersection CClipType = "Intersection"
-	Union        CClipType = "Union"
-	Difference   CClipType = "Difference"
-	XOR          CClipType = "XOR"
-)
-
-type CPathType string
-
-const (
-	Subject CPathType = "Subject"
-	Clip    CPathType = "Clip"
-)
-
-type CJoinType string
-
-const (
-	SquareJoin CJoinType = "SquareJoin"
-	RoundJoin  CJoinType = "RoundJoin"
-	MiterJoin  CJoinType = "MiterJoin"
-)
-
-type CEndType string
-
-const (
-	PolygonEnd CEndType = "PolygonEnd"
-	JoinedEnd  CEndType = "JoinedEnd"
-	ButtEnd    CEndType = "ButtEnd"
-	SquareEnd  CEndType = "SquareEnd"
-	RoundEnd   CEndType = "RoundEnd"
-)
-
-type CPointInPolygonResult string
-
-const (
-	IsOn      CPointInPolygonResult = "IsOn"
-	IsInside  CPointInPolygonResult = "IsInside"
-	IsOutside CPointInPolygonResult = "IsOutside"
-)
+func NewPoint64(x, y int64) *Point64 {
+	return &Point64{
+		p: C.ClipperPoint64{
+			x: C.int64_t(x),
+			y: C.int64_t(y),
+		},
+	}
+}
