@@ -9,12 +9,10 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"unsafe"
 )
 
 type Clipper64 struct {
-	mem *unsafe.Pointer
-	p   *C.ClipperClipper64
+	p *C.ClipperClipper64
 }
 
 type ClipperD struct {

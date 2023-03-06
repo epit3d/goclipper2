@@ -145,7 +145,7 @@ def template_constructor(functype: Type, params: List[Type], has_mem: bool):
 
     return f"""
     func {trim_funcname_constructor(functype.name)}({param_signature}) {"*" if functype.is_ptr else ""}{trim_typename(functype.type_name)} {{
-        {"var mem unsafe.Pointer = C.malloc(0)" if has_mem else ""}
+        {f"var mem unsafe.Pointer = C.malloc(C.clipper_{trim_typename(functype.type_name).lower()}_size())" if has_mem else ""}
 
         return &{trim_typename(functype.type_name)}{{
             p: C.{functype.name}({"mem, " if has_mem else ""}{param_call}),
