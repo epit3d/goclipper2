@@ -1,3 +1,6 @@
 [submodule "third_party/clipper2c"]
 	path = third_party/clipper2c
 	url = https://github.com/epit3d/clipper2c
+[submodule "third_party/pycparser"]
+	path = third_party/pycparser
+	url = https://github.com/eliben/pycparser
