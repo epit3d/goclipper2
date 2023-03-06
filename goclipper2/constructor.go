@@ -93,7 +93,7 @@ func NewPathsdOfPaths(pths []PathD) *PathsD {
 }
 
 func NewPolytree64(parent PolyTree64) *PolyTree64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(10000)
 
 	return &PolyTree64{
 		p: C.clipper_polytree64(mem, parent.p),
@@ -109,7 +109,7 @@ func NewPolytreed(parent PolyTreeD) *PolyTreeD {
 }
 
 func NewRect64(left int64, top int64, right int64, bottom int64) *Rect64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(100)
 
 	return &Rect64{
 		p: C.clipper_rect64(mem, C.int64_t(left), C.int64_t(top), C.int64_t(right), C.int64_t(bottom)),
@@ -125,7 +125,7 @@ func NewRectd(left float64, top float64, right float64, bottom float64) *RectD {
 }
 
 func NewClipper64() *Clipper64 {
-	var mem unsafe.Pointer = C.malloc(10000)
+	var mem unsafe.Pointer = C.malloc(100000)
 
 	return &Clipper64{
 		mem: &mem,
@@ -142,7 +142,7 @@ func NewClipperd(precision int64) *ClipperD {
 }
 
 func NewClipperoffset(miter_limit float64, arc_tolerance float64, preserve_collinear int64, reverse_solution int64) *ClipperOffset {
-	var mem unsafe.Pointer = C.malloc(10000)
+	var mem unsafe.Pointer = C.malloc(20000)
 
 	return &ClipperOffset{
 		p: C.clipper_clipperoffset(mem, C.double(miter_limit), C.double(arc_tolerance), C.int(preserve_collinear), C.int(reverse_solution)),

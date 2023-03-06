@@ -6,6 +6,8 @@ import "C"
 import (
 	"fmt"
 	"log"
+	"regexp"
+	"strconv"
 	"strings"
 	"unsafe"
 )
@@ -38,17 +40,32 @@ func (p *Path64) String() string {
 	return strings.Join(pts_strings, ", ")
 }
 
+func NewPath64MustOfString(str string) *Path64 {
+	p, _ := NewPath64OfString(str)
+	return p
+}
+
 func NewPath64OfString(str string) (*Path64, error) {
-	pts_strings := strings.Split(str, ", ")
+	re := regexp.MustCompile("[0-9-]+")
+	int_strings := re.FindAllString(str, -1)
+	if len(int_strings)%2 == 1 {
+		log.Println(str)
+		return nil, fmt.Errorf("cannot parse path with non even # of coordinates")
+	}
 
 	result := NewPath64()
-	for _, pt_str := range pts_strings {
-		var x, y int64
-		if _, err := fmt.Sscanf(pt_str, "%d,%d", &x, &y); err != nil {
-			return nil, fmt.Errorf("failed to create new path64 of strings, error point: <%v>", pt_str)
+	for i := 0; i < len(int_strings); i = i + 2 {
+		x, err := strconv.Atoi(int_strings[i])
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse X from '%s'", int_strings[0])
 		}
 
-		result.AddPoint(*NewPoint64(x, y))
+		y, err := strconv.Atoi(int_strings[i+1])
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse Y from '%s'", int_strings[1])
+		}
+
+		result.AddPoint(*NewPoint64(int64(x), int64(y)))
 	}
 
 	return result, nil

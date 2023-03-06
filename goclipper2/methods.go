@@ -1111,7 +1111,7 @@ func (c *Clipper64) AddClip(clips Paths64) {
 	C.clipper_clipper64_add_clip(c.p, clips.p)
 }
 
-func (c64 *Clipper64) Execute(ct ClipperClipType, fr ClipperFillRule, closed *Paths64, open *Paths64) int64 {
+func (c64 *Clipper64) Execute(ct ClipperClipType, fr ClipperFillRule, closed Paths64, open Paths64) int64 {
 
 	return int64(C.clipper_clipper64_execute(c64.p, C.ClipperClipType(ct), C.ClipperFillRule(fr), closed.p, open.p))
 }
