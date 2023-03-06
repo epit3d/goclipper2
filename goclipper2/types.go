@@ -168,6 +168,18 @@ type PointD struct {
 	p C.ClipperPointD
 }
 
+func (p *PointD) String() string {
+	return fmt.Sprintf("%f,%f", p.p.x, p.p.y)
+}
+
+func (p *PointD) X() float64 {
+	return float64(p.p.x)
+}
+
+func (p *PointD) Y() float64 {
+	return float64(p.p.y)
+}
+
 func NewPointD(x, y float64) *PointD {
 	return &PointD{
 		p: C.ClipperPointD{
@@ -183,6 +195,14 @@ type Point64 struct {
 
 func (p *Point64) String() string {
 	return fmt.Sprintf("%d,%d", p.p.x, p.p.y)
+}
+
+func (p *Point64) X() int64 {
+	return int64(p.p.x)
+}
+
+func (p *Point64) Y() int64 {
+	return int64(p.p.y)
 }
 
 func NewPoint64(x, y int64) *Point64 {
