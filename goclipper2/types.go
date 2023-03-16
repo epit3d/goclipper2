@@ -1,7 +1,7 @@
 package goclipper2
 
-// #cgo pkg-config: clipper2c
-// #include "clipper2c/clipper2c.h"
+// #cgo LDFLAGS: -L${SRCDIR}/../lib -lclipper2c
+// #include "../lib/clipper2c/clipper2c.h"
 import "C"
 import (
 	"fmt"
