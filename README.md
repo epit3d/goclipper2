@@ -6,51 +6,44 @@
 
 I would gladly refer you to original [documentation](http://www.angusj.com/clipper2/Docs/Overview.htm) by **AngusJohnson** and ask to search for similar names.
 
-### Getting started:
+### Usage
 
-These instructions are for development (was tested on Ubuntu 22.04). Start with cloning this repository.
-
-```bash
-git clone --recursive git@github.com:epit3d/goclipper2.git
-cd bar
-```
-
-I expect you build `clipper2c` which provides C bindings for original library. This should create shared library for `clipper2c` and `clipper2` in `/usr/local/lib` together with their headers.
+Get library:
 
 ```bash
-mkdir third_party/clipper2c/build
-cd third_party/clipper2c/build
-cmake .. -DCLIPPER2_TESTS=OFF -DCLIPPER2_EXAMPLES=OFF
-sudo make install
+go get github.com/epit3d/goclipper2
 ```
 
-You may run existing tests in `goclipper2` directory:
+Simple code:
+
+```go
+package main
+
+import (
+	"log"
+
+	"github.com/epit3d/goclipper2/goclipper2"
+)
+
+func main() {
+	p := goclipper2.NewPath64()
+
+	p.AddPoint(*goclipper2.NewPoint64(0, 0))
+
+	log.Println(p)
+}
+
+```
 
 ```bash
-cd goclipper2
-go test . -v
+go run main.go
 ```
 
-### Generator notes:
+If you do this outside this repo, you should copy `lib` directory to the root of application.
 
-This project would not be possible without bindings of **geoffder** [repository](https://github.com/geoffder/clipper2c)
+### For developer:
 
-I decided to use [C AST parser for python](https://github.com/eliben/pycparser) to generate bindings for go because was too lazy to manually type many functions.
-
-Functions have similar names and I split them into categories:
-
-- constructors
-- methods
-- delete methods
-- destruct methods
-
-code in `goclipper2/generator.py` is organized to match C functions in functions `is_<category>` and has custom generator for each of them.
-
-### Dynamic linking of CGO
-
-Thanks this man [here](https://stackoverflow.com/questions/44210731/how-to-use-a-dynamically-linked-library-from-relative-path) because I didn't know about rpaths and so on. Now what you need to have is just `lib` directory with .so files and golang will try to find them relatively, you will not have to spread them along your whole system.
-
-To run main.go you perform consequently `go build` and `./main`. To run tests you will still need to perform `make install` for the clipper2c
+If you want to dig into how everything is building, go [here](READMEdev.md)
 
 ### Contribution
 
