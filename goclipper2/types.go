@@ -1,6 +1,7 @@
 package goclipper2
 
-// #cgo LDFLAGS: -L${SRCDIR}/../lib -lclipper2c
+// #cgo CFLAGS: -I${SRCDIR}/lib
+// #cgo LDFLAGS: -L${SRCDIR}/../lib -Wl,-rpath=\$ORIGIN/lib -lclipper2c
 // #include "../lib/clipper2c/clipper2c.h"
 import "C"
 import (

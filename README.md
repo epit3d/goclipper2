@@ -46,6 +46,12 @@ Functions have similar names and I split them into categories:
 
 code in `goclipper2/generator.py` is organized to match C functions in functions `is_<category>` and has custom generator for each of them.
 
+### Dynamic linking of CGO
+
+Thanks this man [here](https://stackoverflow.com/questions/44210731/how-to-use-a-dynamically-linked-library-from-relative-path) because I didn't know about rpaths and so on. Now what you need to have is just `lib` directory with .so files and golang will try to find them relatively, you will not have to spread them along your whole system.
+
+To run main.go you perform consequently `go build` and `./main`. To run tests you will still need to perform `make install` for the clipper2c
+
 ### Contribution
 
 Feel free to create an issue or PR with your thoughts.
