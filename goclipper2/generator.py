@@ -190,7 +190,7 @@ def template_method(functype: Type, params: List[Type], has_mem: bool):
 
     return f"""
     func ({receiver.name} *{trim_typename(receiver.type_name)}){trim_funcname_method(functype.name)}({param_signature}) {"*" if functype.is_ptr else ""}{update_name_sign(functype) if functype.type_name != "void" else ""} {{
-        {"var mem unsafe.Pointer = C.malloc(0)" if has_mem else ""}
+        {f"var mem unsafe.Pointer = C.malloc(C.clipper_{trim_typename(functype.type_name).lower()}_size())" if has_mem else ""}
 
         {ret_templ}
     }}

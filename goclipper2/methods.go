@@ -7,7 +7,7 @@ import "C"
 import "unsafe"
 
 func (subjects *Paths64) BooleanOp(clipType ClipperClipType, fillRule ClipperFillRule, clips *Paths64) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_paths64_boolean_op(
@@ -35,7 +35,7 @@ func (subjects *Paths64) BooleanOpTree(clipType ClipperClipType, fillRule Clippe
 }
 
 func (subjects *Paths64) Intersect(clips Paths64, fillrule ClipperFillRule) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_paths64_intersect(mem, subjects.p, clips.p, C.ClipperFillRule(fillrule)),
@@ -44,7 +44,7 @@ func (subjects *Paths64) Intersect(clips Paths64, fillrule ClipperFillRule) *Pat
 }
 
 func (subjects *Paths64) Union(clips Paths64, fillrule ClipperFillRule) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_paths64_union(mem, subjects.p, clips.p, C.ClipperFillRule(fillrule)),
@@ -53,7 +53,7 @@ func (subjects *Paths64) Union(clips Paths64, fillrule ClipperFillRule) *Paths64
 }
 
 func (subjects *Paths64) Difference(clips Paths64, fillrule ClipperFillRule) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_paths64_difference(mem, subjects.p, clips.p, C.ClipperFillRule(fillrule)),
@@ -62,7 +62,7 @@ func (subjects *Paths64) Difference(clips Paths64, fillrule ClipperFillRule) *Pa
 }
 
 func (subjects *Paths64) Xor(clips Paths64, fillrule ClipperFillRule) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_paths64_xor(mem, subjects.p, clips.p, C.ClipperFillRule(fillrule)),
@@ -71,7 +71,7 @@ func (subjects *Paths64) Xor(clips Paths64, fillrule ClipperFillRule) *Paths64 {
 }
 
 func (subjects *PathsD) BooleanOp(clipType ClipperClipType, fillRule ClipperFillRule, clips *PathsD, decimalPrec int) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathsd_boolean_op(
@@ -101,7 +101,7 @@ func (subjects *PathsD) BooleanOpTree(clipType ClipperClipType, fillRule Clipper
 }
 
 func (subjects *PathsD) Intersect(clips PathsD, fillrule ClipperFillRule, decimal_prec int64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathsd_intersect(mem, subjects.p, clips.p, C.ClipperFillRule(fillrule), C.int(decimal_prec)),
@@ -110,7 +110,7 @@ func (subjects *PathsD) Intersect(clips PathsD, fillrule ClipperFillRule, decima
 }
 
 func (subjects *PathsD) Union(clips PathsD, fillrule ClipperFillRule, decimal_prec int64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathsd_union(mem, subjects.p, clips.p, C.ClipperFillRule(fillrule), C.int(decimal_prec)),
@@ -119,7 +119,7 @@ func (subjects *PathsD) Union(clips PathsD, fillrule ClipperFillRule, decimal_pr
 }
 
 func (subjects *PathsD) Difference(clips PathsD, fillrule ClipperFillRule, decimal_prec int64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathsd_difference(mem, subjects.p, clips.p, C.ClipperFillRule(fillrule), C.int(decimal_prec)),
@@ -128,7 +128,7 @@ func (subjects *PathsD) Difference(clips PathsD, fillrule ClipperFillRule, decim
 }
 
 func (subjects *PathsD) Xor(clips PathsD, fillrule ClipperFillRule, decimal_prec int64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathsd_xor(mem, subjects.p, clips.p, C.ClipperFillRule(fillrule), C.int(decimal_prec)),
@@ -137,7 +137,7 @@ func (subjects *PathsD) Xor(clips PathsD, fillrule ClipperFillRule, decimal_prec
 }
 
 func (paths *Paths64) Inflate(delta float64, jt ClipperJoinType, et ClipperEndType, miter_limit float64) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_paths64_inflate(mem, paths.p, C.double(delta), C.ClipperJoinType(jt), C.ClipperEndType(et), C.double(miter_limit)),
@@ -146,7 +146,7 @@ func (paths *Paths64) Inflate(delta float64, jt ClipperJoinType, et ClipperEndTy
 }
 
 func (paths *PathsD) Inflate(delta float64, jt ClipperJoinType, et ClipperEndType, miter_limit float64, precision int64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathsd_inflate(mem, paths.p, C.double(delta), C.ClipperJoinType(jt), C.ClipperEndType(et), C.double(miter_limit), C.int(precision)),
@@ -155,7 +155,7 @@ func (paths *PathsD) Inflate(delta float64, jt ClipperJoinType, et ClipperEndTyp
 }
 
 func (path *Path64) Bounds() *Rect64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_rect64_size())
 
 	return &Rect64{
 		p: C.clipper_path64_bounds(mem, path.p),
@@ -164,7 +164,7 @@ func (path *Path64) Bounds() *Rect64 {
 }
 
 func (path *PathD) Bounds() *RectD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_rectd_size())
 
 	return &RectD{
 		p: C.clipper_pathd_bounds(mem, path.p),
@@ -173,7 +173,7 @@ func (path *PathD) Bounds() *RectD {
 }
 
 func (paths *Paths64) Bounds() *Rect64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_rect64_size())
 
 	return &Rect64{
 		p: C.clipper_paths64_bounds(mem, paths.p),
@@ -182,7 +182,7 @@ func (paths *Paths64) Bounds() *Rect64 {
 }
 
 func (paths *PathsD) Bounds() *RectD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_rectd_size())
 
 	return &RectD{
 		p: C.clipper_pathsd_bounds(mem, paths.p),
@@ -307,7 +307,7 @@ func (paths *PathsD) PathLength(idx int64) int64 {
 }
 
 func (paths *Paths64) GetPath(idx int64) *Path64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_path64_size())
 
 	return &Path64{
 		p: C.clipper_paths64_get_path(mem, paths.p, C.int(idx)),
@@ -316,7 +316,7 @@ func (paths *Paths64) GetPath(idx int64) *Path64 {
 }
 
 func (paths *PathsD) GetPath(idx int64) *PathD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 
 	return &PathD{
 		p: C.clipper_pathsd_get_path(mem, paths.p, C.int(idx)),
@@ -361,7 +361,7 @@ func (p *PathsD) ToPoints() [][]PointD {
 }
 
 func (path *Path64) Translate(dx int64, dy int64) *Path64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_path64_size())
 
 	return &Path64{
 		p: C.clipper_path64_translate(mem, path.p, C.int64_t(dx), C.int64_t(dy)),
@@ -370,7 +370,7 @@ func (path *Path64) Translate(dx int64, dy int64) *Path64 {
 }
 
 func (path *PathD) Translate(dx float64, dy float64) *PathD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 
 	return &PathD{
 		p: C.clipper_pathd_translate(mem, path.p, C.double(dx), C.double(dy)),
@@ -379,7 +379,7 @@ func (path *PathD) Translate(dx float64, dy float64) *PathD {
 }
 
 func (paths *Paths64) Translate(dx int64, dy int64) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_paths64_translate(mem, paths.p, C.int64_t(dx), C.int64_t(dy)),
@@ -388,7 +388,7 @@ func (paths *Paths64) Translate(dx int64, dy int64) *Paths64 {
 }
 
 func (paths *PathsD) Translate(dx float64, dy float64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathsd_translate(mem, paths.p, C.double(dx), C.double(dy)),
@@ -397,7 +397,7 @@ func (paths *PathsD) Translate(dx float64, dy float64) *PathsD {
 }
 
 func (path *Path64) Scale(sx float64, sy float64) (*Path64, int) {
-	mem := C.malloc(0)
+	mem := C.malloc(C.clipper_path64_size())
 	error_code := C.int(0)
 
 	return &Path64{
@@ -405,7 +405,7 @@ func (path *Path64) Scale(sx float64, sy float64) (*Path64, int) {
 	}, int(error_code)
 }
 func (path *PathD) Scale(sx float64, sy float64) (*PathD, int) {
-	mem := C.malloc(0)
+	mem := C.malloc(C.clipper_pathd_size())
 	error_code := C.int(0)
 
 	return &PathD{
@@ -413,7 +413,7 @@ func (path *PathD) Scale(sx float64, sy float64) (*PathD, int) {
 	}, int(error_code)
 }
 func (path *Paths64) Scale(sx float64, sy float64) (*Paths64, int) {
-	mem := C.malloc(0)
+	mem := C.malloc(C.clipper_paths64_size())
 	error_code := C.int(0)
 
 	return &Paths64{
@@ -421,7 +421,7 @@ func (path *Paths64) Scale(sx float64, sy float64) (*Paths64, int) {
 	}, int(error_code)
 }
 func (path *PathsD) Scale(sx float64, sy float64) (*PathsD, int) {
-	mem := C.malloc(0)
+	mem := C.malloc(C.clipper_pathsd_size())
 	error_code := C.int(0)
 
 	return &PathsD{
@@ -429,7 +429,7 @@ func (path *PathsD) Scale(sx float64, sy float64) (*PathsD, int) {
 	}, int(error_code)
 }
 func (path *Path64) TrimCollinear(is_open_path int64) *Path64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_path64_size())
 
 	return &Path64{
 		p: C.clipper_path64_trim_collinear(mem, path.p, C.int(is_open_path)),
@@ -438,7 +438,7 @@ func (path *Path64) TrimCollinear(is_open_path int64) *Path64 {
 }
 
 func (path *PathD) TrimCollinear(precision int64, is_open_path int64) *PathD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 
 	return &PathD{
 		p: C.clipper_pathd_trim_collinear(mem, path.p, C.int(precision), C.int(is_open_path)),
@@ -447,7 +447,7 @@ func (path *PathD) TrimCollinear(precision int64, is_open_path int64) *PathD {
 }
 
 func (path *Path64) Simplify(epsilon float64, is_open_path int64) *Path64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_path64_size())
 
 	return &Path64{
 		p: C.clipper_path64_simplify(mem, path.p, C.double(epsilon), C.int(is_open_path)),
@@ -456,7 +456,7 @@ func (path *Path64) Simplify(epsilon float64, is_open_path int64) *Path64 {
 }
 
 func (path *PathD) Simplify(epsilon float64, is_open_path int64) *PathD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 
 	return &PathD{
 		p: C.clipper_pathd_simplify(mem, path.p, C.double(epsilon), C.int(is_open_path)),
@@ -465,7 +465,7 @@ func (path *PathD) Simplify(epsilon float64, is_open_path int64) *PathD {
 }
 
 func (paths *Paths64) Simplify(epsilon float64, is_open_paths int64) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_paths64_simplify(mem, paths.p, C.double(epsilon), C.int(is_open_paths)),
@@ -474,7 +474,7 @@ func (paths *Paths64) Simplify(epsilon float64, is_open_paths int64) *Paths64 {
 }
 
 func (paths *PathsD) Simplify(epsilon float64, is_open_paths int64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathsd_simplify(mem, paths.p, C.double(epsilon), C.int(is_open_paths)),
@@ -483,7 +483,7 @@ func (paths *PathsD) Simplify(epsilon float64, is_open_paths int64) *PathsD {
 }
 
 func (path *Path64) RamerDouglasPeucker(epsilon float64) *Path64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_path64_size())
 
 	return &Path64{
 		p: C.clipper_path64_ramer_douglas_peucker(mem, path.p, C.double(epsilon)),
@@ -492,7 +492,7 @@ func (path *Path64) RamerDouglasPeucker(epsilon float64) *Path64 {
 }
 
 func (path *PathD) RamerDouglasPeucker(epsilon float64) *PathD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 
 	return &PathD{
 		p: C.clipper_pathd_ramer_douglas_peucker(mem, path.p, C.double(epsilon)),
@@ -501,7 +501,7 @@ func (path *PathD) RamerDouglasPeucker(epsilon float64) *PathD {
 }
 
 func (paths *Paths64) RamerDouglasPeucker(epsilon float64) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_paths64_ramer_douglas_peucker(mem, paths.p, C.double(epsilon)),
@@ -510,7 +510,7 @@ func (paths *Paths64) RamerDouglasPeucker(epsilon float64) *Paths64 {
 }
 
 func (paths *PathsD) RamerDouglasPeucker(epsilon float64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathsd_ramer_douglas_peucker(mem, paths.p, C.double(epsilon)),
@@ -519,7 +519,7 @@ func (paths *PathsD) RamerDouglasPeucker(epsilon float64) *PathsD {
 }
 
 func (path *Path64) StripNearEqual(max_dist_sqrd float64, is_closed_path int64) *Path64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_path64_size())
 
 	return &Path64{
 		p: C.clipper_path64_strip_near_equal(mem, path.p, C.double(max_dist_sqrd), C.int(is_closed_path)),
@@ -528,7 +528,7 @@ func (path *Path64) StripNearEqual(max_dist_sqrd float64, is_closed_path int64) 
 }
 
 func (path *PathD) StripNearEqual(max_dist_sqrd float64, is_closed_path int64) *PathD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 
 	return &PathD{
 		p: C.clipper_pathd_strip_near_equal(mem, path.p, C.double(max_dist_sqrd), C.int(is_closed_path)),
@@ -537,7 +537,7 @@ func (path *PathD) StripNearEqual(max_dist_sqrd float64, is_closed_path int64) *
 }
 
 func (paths *Paths64) StripNearEqual(max_dist_sqrd float64, is_closed_paths int64) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_paths64_strip_near_equal(mem, paths.p, C.double(max_dist_sqrd), C.int(is_closed_paths)),
@@ -546,7 +546,7 @@ func (paths *Paths64) StripNearEqual(max_dist_sqrd float64, is_closed_paths int6
 }
 
 func (paths *PathsD) StripNearEqual(max_dist_sqrd float64, is_closed_paths int64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathsd_strip_near_equal(mem, paths.p, C.double(max_dist_sqrd), C.int(is_closed_paths)),
@@ -555,7 +555,7 @@ func (paths *PathsD) StripNearEqual(max_dist_sqrd float64, is_closed_paths int64
 }
 
 func (path *Path64) StripDuplicates(is_closed_path int64) *Path64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_path64_size())
 
 	return &Path64{
 		p: C.clipper_path64_strip_duplicates(mem, path.p, C.int(is_closed_path)),
@@ -564,7 +564,7 @@ func (path *Path64) StripDuplicates(is_closed_path int64) *Path64 {
 }
 
 func (path *PathD) StripDuplicates(is_closed_path int64) *PathD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 
 	return &PathD{
 		p: C.clipper_pathd_strip_duplicates(mem, path.p, C.int(is_closed_path)),
@@ -573,7 +573,7 @@ func (path *PathD) StripDuplicates(is_closed_path int64) *PathD {
 }
 
 func (paths *Paths64) StripDuplicates(is_closed_paths int64) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_paths64_strip_duplicates(mem, paths.p, C.int(is_closed_paths)),
@@ -582,7 +582,7 @@ func (paths *Paths64) StripDuplicates(is_closed_paths int64) *Paths64 {
 }
 
 func (paths *PathsD) StripDuplicates(is_closed_paths int64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathsd_strip_duplicates(mem, paths.p, C.int(is_closed_paths)),
@@ -591,7 +591,7 @@ func (paths *PathsD) StripDuplicates(is_closed_paths int64) *PathsD {
 }
 
 func (path *Path64) ToPathd() *PathD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 
 	return &PathD{
 		p: C.clipper_path64_to_pathd(mem, path.p),
@@ -600,7 +600,7 @@ func (path *Path64) ToPathd() *PathD {
 }
 
 func (path *PathD) ToPath64() *Path64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_path64_size())
 
 	return &Path64{
 		p: C.clipper_pathd_to_path64(mem, path.p),
@@ -609,7 +609,7 @@ func (path *PathD) ToPath64() *Path64 {
 }
 
 func (paths *Paths64) ToPathsd() *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_paths64_to_pathsd(mem, paths.p),
@@ -618,7 +618,7 @@ func (paths *Paths64) ToPathsd() *PathsD {
 }
 
 func (paths *PathsD) ToPaths64() *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_pathsd_to_paths64(mem, paths.p),
@@ -629,7 +629,7 @@ func (paths *PathsD) ToPaths64() *Paths64 {
 func (p *Path64) ScaleToPathD(sx, sy float64) (*PathD, int) {
 	var (
 		error_code                = C.int(0)
-		mem        unsafe.Pointer = C.malloc(0)
+		mem        unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 	)
 
 	return &PathD{
@@ -640,7 +640,7 @@ func (p *Path64) ScaleToPathD(sx, sy float64) (*PathD, int) {
 func (p *PathD) ScaleToPath64(sx, sy float64) (*Path64, int) {
 	var (
 		error_code                = C.int(0)
-		mem        unsafe.Pointer = C.malloc(0)
+		mem        unsafe.Pointer = C.malloc(C.clipper_path64_size())
 	)
 
 	return &Path64{
@@ -651,7 +651,7 @@ func (p *PathD) ScaleToPath64(sx, sy float64) (*Path64, int) {
 func (p *Paths64) ScaleToPathsD(sx, sy float64) (*PathsD, int) {
 	var (
 		error_code                = C.int(0)
-		mem        unsafe.Pointer = C.malloc(0)
+		mem        unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 	)
 
 	return &PathsD{
@@ -662,7 +662,7 @@ func (p *Paths64) ScaleToPathsD(sx, sy float64) (*PathsD, int) {
 func (p *PathsD) ScaleToPaths64(sx, sy float64) (*Paths64, int) {
 	var (
 		error_code                = C.int(0)
-		mem        unsafe.Pointer = C.malloc(0)
+		mem        unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 	)
 
 	return &Paths64{
@@ -671,7 +671,7 @@ func (p *PathsD) ScaleToPaths64(sx, sy float64) (*Paths64, int) {
 }
 
 func (pattern *Path64) MinkowskiSum(path Path64, is_closed int64) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_path64_minkowski_sum(mem, pattern.p, path.p, C.int(is_closed)),
@@ -680,7 +680,7 @@ func (pattern *Path64) MinkowskiSum(path Path64, is_closed int64) *Paths64 {
 }
 
 func (pattern *PathD) MinkowskiSum(path PathD, is_closed int64, precision int64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathd_minkowski_sum(mem, pattern.p, path.p, C.int(is_closed), C.int(precision)),
@@ -689,7 +689,7 @@ func (pattern *PathD) MinkowskiSum(path PathD, is_closed int64, precision int64)
 }
 
 func (pattern *Path64) MinkowskiDiff(path Path64, is_closed int64) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_path64_minkowski_diff(mem, pattern.p, path.p, C.int(is_closed)),
@@ -698,7 +698,7 @@ func (pattern *Path64) MinkowskiDiff(path Path64, is_closed int64) *Paths64 {
 }
 
 func (pattern *PathD) MinkowskiDiff(path PathD, is_closed int64, precision int64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_pathd_minkowski_diff(mem, pattern.p, path.p, C.int(is_closed), C.int(precision)),
@@ -813,7 +813,7 @@ func (pt *PolyTree64) IsHole() int64 {
 }
 
 func (pt *PolyTree64) Polygon() *Path64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_path64_size())
 
 	return &Path64{
 		p: C.clipper_polytree64_polygon(mem, pt.p),
@@ -827,7 +827,7 @@ func (pt *PolyTree64) Area() float64 {
 }
 
 func (pt *PolyTree64) ToPaths() *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_polytree64_to_paths(mem, pt.p),
@@ -895,7 +895,7 @@ func (pt *PolyTreeD) IsHole() int64 {
 }
 
 func (pt *PolyTreeD) Polygon() *PathD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 
 	return &PathD{
 		p: C.clipper_polytreed_polygon(mem, pt.p),
@@ -909,7 +909,7 @@ func (pt *PolyTreeD) Area() float64 {
 }
 
 func (pt *PolyTreeD) ToPaths() *PathsD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 	return &PathsD{
 		p: C.clipper_polytreed_to_paths(mem, pt.p),
@@ -936,7 +936,7 @@ func (r *Rect64) Midpoint() Point64 {
 }
 
 func (r *Rect64) AsPath() *Path64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_path64_size())
 
 	return &Path64{
 		p: C.clipper_rect64_as_path(mem, r.p),
@@ -960,7 +960,7 @@ func (r *Rect64) ScaleMut(scale float64) {
 }
 
 func (r *Rect64) Scale(scale float64) *Rect64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_rect64_size())
 
 	return &Rect64{
 		p: C.clipper_rect64_scale(mem, r.p, C.double(scale)),
@@ -997,7 +997,7 @@ func (r *RectD) Midpoint() PointD {
 }
 
 func (r *RectD) AsPath() *PathD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 
 	return &PathD{
 		p: C.clipper_rectd_as_path(mem, r.p),
@@ -1021,7 +1021,7 @@ func (r *RectD) ScaleMut(scale float64) {
 }
 
 func (r *RectD) Scale(scale float64) *RectD {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_rectd_size())
 
 	return &RectD{
 		p: C.clipper_rectd_scale(mem, r.p, C.double(scale)),
@@ -1228,7 +1228,7 @@ func (c *ClipperOffset) AddPaths64(p Paths64, jt ClipperJoinType, et ClipperEndT
 }
 
 func (c *ClipperOffset) Execute(delta float64) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(0)
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 	return &Paths64{
 		p: C.clipper_clipperoffset_execute(mem, c.p, C.double(delta)),

@@ -164,7 +164,7 @@ methods = {
 
     'clipper_path64_scale': """
     func (path *Path64) Scale(sx float64, sy float64) (*Path64, int) {
-		mem := C.malloc(0)
+		mem := C.malloc(C.clipper_path64_size())
 		error_code := C.int(0)
 
 		return &Path64{
@@ -174,7 +174,7 @@ methods = {
 
     'clipper_pathd_scale': """
 		func (path *PathD) Scale(sx float64, sy float64) (*PathD, int) {
-		mem := C.malloc(0)
+		mem := C.malloc(C.clipper_pathd_size())
 		error_code := C.int(0)
 
 		return &PathD{
@@ -184,7 +184,7 @@ methods = {
 
     'clipper_paths64_scale': """
     func (path *Paths64) Scale(sx float64, sy float64) (*Paths64, int) {
-		mem := C.malloc(0)
+		mem := C.malloc(C.clipper_paths64_size())
 		error_code := C.int(0)
 
 		return &Paths64{
@@ -194,7 +194,7 @@ methods = {
 
     'clipper_pathsd_scale': """
 		func (path *PathsD) Scale(sx float64, sy float64) (*PathsD, int) {
-		mem := C.malloc(0)
+		mem := C.malloc(C.clipper_pathsd_size())
 		error_code := C.int(0)
 
 		return &PathsD{
@@ -204,7 +204,7 @@ methods = {
 
     'clipper_paths64_boolean_op': '''
     func (subjects *Paths64) BooleanOp(clipType ClipperClipType, fillRule ClipperFillRule, clips *Paths64) *Paths64 {
-		var mem unsafe.Pointer = C.malloc(0)
+		var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
 		return &Paths64{
 			p: C.clipper_paths64_boolean_op(
@@ -236,7 +236,7 @@ methods = {
 
     'clipper_pathsd_boolean_op': '''
     func (subjects *PathsD) BooleanOp(clipType ClipperClipType, fillRule ClipperFillRule, clips *PathsD, decimalPrec int) *PathsD {
-		var mem unsafe.Pointer = C.malloc(0)
+		var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 
 		return &PathsD{
 			p: C.clipper_pathsd_boolean_op(
@@ -272,7 +272,7 @@ methods = {
     func (p *PathD) ScaleToPath64(sx, sy float64) (*Path64, int) {
 		var (
 			error_code                = C.int(0)
-			mem        unsafe.Pointer = C.malloc(0)
+			mem        unsafe.Pointer = C.malloc(C.clipper_path64_size())
 		)
 
 		return &Path64{
@@ -285,7 +285,7 @@ methods = {
     func (p *Path64) ScaleToPathD(sx, sy float64) (*PathD, int) {
 		var (
 			error_code                = C.int(0)
-			mem        unsafe.Pointer = C.malloc(0)
+			mem        unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 		)
 
 		return &PathD{
@@ -298,7 +298,7 @@ methods = {
     func (p *Paths64) ScaleToPathsD(sx, sy float64) (*PathsD, int) {
 		var (
 			error_code                = C.int(0)
-			mem        unsafe.Pointer = C.malloc(0)
+			mem        unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
 		)
 
 		return &PathsD{
@@ -311,7 +311,7 @@ methods = {
     func (p *PathsD) ScaleToPaths64(sx, sy float64) (*Paths64, int) {
 		var (
 			error_code                = C.int(0)
-			mem        unsafe.Pointer = C.malloc(0)
+			mem        unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 		)
 
 		return &Paths64{
