@@ -35,13 +35,6 @@ struct ClipperRect64 {
   int64_t bottom;
 };
 
-struct ClipperRectD {
-  double left;
-  double top;
-  double right;
-  double bottom;
-};
-
 typedef enum ClipperFillRule {
   EVEN_ODD,
   NON_ZERO,
@@ -78,6 +71,13 @@ typedef enum ClipperPointInPolygonResult {
   IS_INSIDE,
   IS_OUTSIDE
 } ClipperPointInPolygonResult;
+
+// delta callback for clipper offset
+typedef double (*ClipperDeltaCallback64)(
+  ClipperPath64* path,
+  ClipperPathD* path_normals,
+  size_t curr_idx,
+  size_t prev_idx);
 
 #ifdef __cplusplus
 }
