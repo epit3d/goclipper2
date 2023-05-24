@@ -117,14 +117,6 @@ func NewRect64(left int64, top int64, right int64, bottom int64) *Rect64 {
 	}
 }
 
-func NewRectd(left float64, top float64, right float64, bottom float64) *RectD {
-	var mem unsafe.Pointer = C.malloc(C.clipper_rectd_size())
-
-	return &RectD{
-		p: C.clipper_rectd(mem, C.double(left), C.double(top), C.double(right), C.double(bottom)),
-	}
-}
-
 func NewClipper64() *Clipper64 {
 	var mem unsafe.Pointer = C.malloc(C.clipper_clipper64_size())
 

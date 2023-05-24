@@ -25,10 +25,6 @@ func (p *Rect64) Destruct() {
 	C.clipper_destruct_rect64(p.p)
 }
 
-func (p *RectD) Destruct() {
-	C.clipper_destruct_rectd(p.p)
-}
-
 func (p *PolyTree64) Destruct() {
 	C.clipper_destruct_polytree64(p.p)
 }

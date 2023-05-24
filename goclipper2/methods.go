@@ -154,38 +154,11 @@ func (paths *PathsD) Inflate(delta float64, jt ClipperJoinType, et ClipperEndTyp
 
 }
 
-func (path *Path64) Bounds() *Rect64 {
-	var mem unsafe.Pointer = C.malloc(C.clipper_rect64_size())
-
-	return &Rect64{
-		p: C.clipper_path64_bounds(mem, path.p),
-	}
-
-}
-
-func (path *PathD) Bounds() *RectD {
-	var mem unsafe.Pointer = C.malloc(C.clipper_rectd_size())
-
-	return &RectD{
-		p: C.clipper_pathd_bounds(mem, path.p),
-	}
-
-}
-
 func (paths *Paths64) Bounds() *Rect64 {
 	var mem unsafe.Pointer = C.malloc(C.clipper_rect64_size())
 
 	return &Rect64{
 		p: C.clipper_paths64_bounds(mem, paths.p),
-	}
-
-}
-
-func (paths *PathsD) Bounds() *RectD {
-	var mem unsafe.Pointer = C.malloc(C.clipper_rectd_size())
-
-	return &RectD{
-		p: C.clipper_pathsd_bounds(mem, paths.p),
 	}
 
 }
@@ -554,42 +527,6 @@ func (paths *PathsD) StripNearEqual(max_dist_sqrd float64, is_closed_paths int64
 
 }
 
-func (path *Path64) StripDuplicates(is_closed_path int64) *Path64 {
-	var mem unsafe.Pointer = C.malloc(C.clipper_path64_size())
-
-	return &Path64{
-		p: C.clipper_path64_strip_duplicates(mem, path.p, C.int(is_closed_path)),
-	}
-
-}
-
-func (path *PathD) StripDuplicates(is_closed_path int64) *PathD {
-	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
-
-	return &PathD{
-		p: C.clipper_pathd_strip_duplicates(mem, path.p, C.int(is_closed_path)),
-	}
-
-}
-
-func (paths *Paths64) StripDuplicates(is_closed_paths int64) *Paths64 {
-	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
-
-	return &Paths64{
-		p: C.clipper_paths64_strip_duplicates(mem, paths.p, C.int(is_closed_paths)),
-	}
-
-}
-
-func (paths *PathsD) StripDuplicates(is_closed_paths int64) *PathsD {
-	var mem unsafe.Pointer = C.malloc(C.clipper_pathsd_size())
-
-	return &PathsD{
-		p: C.clipper_pathsd_strip_duplicates(mem, paths.p, C.int(is_closed_paths)),
-	}
-
-}
-
 func (path *Path64) ToPathd() *PathD {
 	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
 
@@ -856,16 +793,6 @@ func (pt *PolyTreeD) GetChild(idx int64) *PolyTreeD {
 
 }
 
-func (pt *PolyTreeD) SetInvScale(value float64) {
-
-	C.clipper_polytreed_set_inv_scale(pt.p, C.double(value))
-}
-
-func (pt *PolyTreeD) InvScale() float64 {
-
-	return float64(C.clipper_polytreed_inv_scale(pt.p))
-}
-
 func (pt *PolyTreeD) AddChild(path Path64) *PolyTreeD {
 
 	return &PolyTreeD{
@@ -978,72 +905,8 @@ func (a *Rect64) Intersects(b Rect64) int64 {
 	return int64(C.clipper_rect64_intersects(a.p, b.p))
 }
 
-func (r *RectD) Width() float64 {
-
-	return float64(C.clipper_rectd_width(r.p))
-}
-
-func (r *RectD) Height() float64 {
-
-	return float64(C.clipper_rectd_height(r.p))
-}
-
-func (r *RectD) Midpoint() PointD {
-
-	return PointD{
-		p: C.clipper_rectd_midpoint(r.p),
-	}
-
-}
-
-func (r *RectD) AsPath() *PathD {
-	var mem unsafe.Pointer = C.malloc(C.clipper_pathd_size())
-
-	return &PathD{
-		p: C.clipper_rectd_as_path(mem, r.p),
-	}
-
-}
-
-func (r *RectD) ContainsPt(pt PointD) int64 {
-
-	return int64(C.clipper_rectd_contains_pt(r.p, pt.p))
-}
-
-func (a *RectD) ContainsRect(b RectD) int64 {
-
-	return int64(C.clipper_rectd_contains_rect(a.p, b.p))
-}
-
-func (r *RectD) ScaleMut(scale float64) {
-
-	C.clipper_rectd_scale_mut(r.p, C.double(scale))
-}
-
-func (r *RectD) Scale(scale float64) *RectD {
-	var mem unsafe.Pointer = C.malloc(C.clipper_rectd_size())
-
-	return &RectD{
-		p: C.clipper_rectd_scale(mem, r.p, C.double(scale)),
-	}
-
-}
-
-func (r *RectD) IsEmpty() int64 {
-
-	return int64(C.clipper_rectd_is_empty(r.p))
-}
-
-func (a *RectD) Intersects(b RectD) int64 {
-
-	return int64(C.clipper_rectd_intersects(a.p, b.p))
-}
 
 func (rect *Rect64) ToStruct() Rect64 {
-	return *rect
-}
-
-func (rect *RectD) ToStruct() RectD {
 	return *rect
 }
 
@@ -1205,16 +1068,6 @@ func (c *ClipperOffset) ErrorCode() int64 {
 func (c *ClipperOffset) Clear() {
 
 	C.clipper_clipperoffset_clear(c.p)
-}
-
-func (c *ClipperOffset) AddPathd(p PathD, jt ClipperJoinType, et ClipperEndType) {
-
-	C.clipper_clipperoffset_add_pathd(c.p, p.p, C.ClipperJoinType(jt), C.ClipperEndType(et))
-}
-
-func (c *ClipperOffset) AddPathsd(p PathsD, jt ClipperJoinType, et ClipperEndType) {
-
-	C.clipper_clipperoffset_add_pathsd(c.p, p.p, C.ClipperJoinType(jt), C.ClipperEndType(et))
 }
 
 func (c *ClipperOffset) AddPath64(p Path64, jt ClipperJoinType, et ClipperEndType) {
