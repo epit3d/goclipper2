@@ -68,6 +68,25 @@ constructors = {
 }
 
 methods = {
+	# ignore broken functions
+	'clipper_polytreed_set_inv_scale': '''''',
+    'clipper_polytreed_inv_scale': '''''',
+    'clipper_pathsd_strip_duplicates': '''''',
+	'clipper_paths64_strip_duplicates': '''''',
+    'clipper_pathd_strip_duplicates': '''''',
+    'clipper_path64_strip_duplicates': '''''',
+
+	# ignore extern function
+	'goDeltaCallback64': '''''',
+
+    # ignore this one
+	'ClipperDeltaCallback64': '''''',
+
+	# ignore this one
+	'clipper_clipperoffset_execute_callback': '''''',
+    
+	'clipper_clipperoffset_execute_gocallback': '''''',
+
     'clipper_paths64_to_points': '''
     func (p *Paths64) ToPoints() [][]Point64 {
 		var result [][]Point64
@@ -155,12 +174,6 @@ methods = {
 		return *rect
 	}
 	""",
-
-    'clipper_rectd_to_struct': """
-    func (rect *RectD) ToStruct() RectD {
-		return *rect
-	}
-    """,
 
     'clipper_path64_scale': """
     func (path *Path64) Scale(sx float64, sy float64) (*Path64, int) {

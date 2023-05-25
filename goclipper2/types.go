@@ -1,31 +1,65 @@
 package goclipper2
 
-// #cgo CFLAGS: -I${SRCDIR}/lib
-// #cgo LDFLAGS: -L${SRCDIR}/../lib -Wl,-rpath=\$ORIGIN/lib -lclipper2c
-// #include "../lib/clipper2c/clipper2c.h"
+/*
+#cgo CFLAGS: -I${SRCDIR}/lib
+#cgo LDFLAGS: -L/usr/local/lib -Wl,-rpath=\$ORIGIN/lib -lclipper2c
+
+#ifndef GO_BINDINGS
+#define GO_BINDINGS
+#endif
+
+#include "../lib/clipper2c/clipper2c.h"
+*/
 import "C"
 import (
 	"fmt"
 	"log"
 	"regexp"
+	"runtime/cgo"
 	"strconv"
 	"strings"
+	"unsafe"
 )
 
-type Clipper64 struct {
-	p *C.ClipperClipper64
+type ClipperOffsetCallback func(
+	path *Path64,
+	path_normals *PathD,
+	curr_idx int,
+	prev_idx int,
+) float64
+
+//export goDeltaCallback64
+func goDeltaCallback64(
+	h C.uintptr_t,
+	path *C.ClipperPath64,
+	path_normals *C.ClipperPathD,
+	curr_idx C.size_t,
+	prev_idx C.size_t,
+) C.double {
+	fn := cgo.Handle(h).Value().(ClipperOffsetCallback)
+
+	gopath := &Path64{
+		p: path,
+	}
+
+	gopath_normals := &PathD{
+		p: path_normals,
+	}
+
+	return C.double(fn(gopath, gopath_normals, int(curr_idx), int(prev_idx)))
 }
 
-type ClipperD struct {
-	p *C.ClipperClipperD
-}
+func (co *ClipperOffset) ExecuteCallback(cb ClipperOffsetCallback) *Paths64 {
+	// execute callback is placed here so that #define GO_BINDINGS is defined
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
-type ClipperOffset struct {
-	p *C.ClipperClipperOffset
-}
+	// create handle for callback
+	h := cgo.NewHandle(cb)
+	defer h.Delete()
 
-type Path64 struct {
-	p *C.ClipperPath64
+	return &Paths64{
+		p: C.clipper_clipperoffset_execute_gocallback(mem, co.p, C.uintptr_t(h)),
+	}
 }
 
 func (p *Path64) String() string {
@@ -70,6 +104,22 @@ func NewPath64OfString(str string) (*Path64, error) {
 	return result, nil
 }
 
+type Clipper64 struct {
+	p *C.ClipperClipper64
+}
+
+type ClipperD struct {
+	p *C.ClipperClipperD
+}
+
+type ClipperOffset struct {
+	p *C.ClipperClipperOffset
+}
+
+type Path64 struct {
+	p *C.ClipperPath64
+}
+
 type PathD struct {
 	p *C.ClipperPathD
 }
@@ -99,10 +149,6 @@ type PathsD struct {
 
 type Rect64 struct {
 	p *C.ClipperRect64
-}
-
-type RectD struct {
-	p *C.ClipperRectD
 }
 
 type PolyTree64 struct {
@@ -214,3 +260,17 @@ func NewPoint64(x, y int64) *Point64 {
 		},
 	}
 }
+
+type DeltaCallback func(
+	path *Path64,
+	normals *PathD,
+	currIdx int64,
+	prevIdx int64,
+) float64
+
+type callback func(
+	path *C.ClipperPath64,
+	normals *C.ClipperPathD,
+	currIdx C.int64_t,
+	prevIdx C.int64_t,
+) C.double
