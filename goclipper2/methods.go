@@ -905,7 +905,6 @@ func (a *Rect64) Intersects(b Rect64) int64 {
 	return int64(C.clipper_rect64_intersects(a.p, b.p))
 }
 
-
 func (rect *Rect64) ToStruct() Rect64 {
 	return *rect
 }

@@ -395,7 +395,10 @@ def show_func_defs(filename):
     # make sure one exists in PATH.
     ast = parse_file(filename,
                      use_cpp=True,
-                     cpp_args=r'-I../third_party/pycparser/utils/fake_libc_include')
+                     cpp_args=[
+                         r'-I../third_party/pycparser/utils/fake_libc_include',
+                         r'-DGO_BINDINGS=1',
+                         ])
 
     v = FuncDefVisitor()
     v.visit(ast)

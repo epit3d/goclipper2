@@ -76,21 +76,16 @@ methods = {
     'clipper_pathd_strip_duplicates': '''''',
     'clipper_path64_strip_duplicates': '''''',
 
+	# ignore extern function
+	'goDeltaCallback64': '''''',
+
     # ignore this one
 	'ClipperDeltaCallback64': '''''',
 
 	# ignore this one
 	'clipper_clipperoffset_execute_callback': '''''',
     
-	'clipper_clipperoffset_execute_gocallback': '''
-    func (c *ClipperOffset) ExecuteGocallback(h C.uintptr_t) *Paths64 {
-		var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
-
-		return &Paths64{
-			p: C.clipper_clipperoffset_execute_gocallback(mem, c.p, C.uintptr_t(h)),
-		}
-	}
-    ''',
+	'clipper_clipperoffset_execute_gocallback': '''''',
 
     'clipper_paths64_to_points': '''
     func (p *Paths64) ToPoints() [][]Point64 {

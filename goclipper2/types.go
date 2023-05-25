@@ -21,6 +21,13 @@ import (
 	"unsafe"
 )
 
+type ClipperOffsetCallback func(
+	path *Path64,
+	path_normals *PathD,
+	curr_idx int,
+	prev_idx int,
+) float64
+
 //export goDeltaCallback64
 func goDeltaCallback64(
 	h C.uintptr_t,
@@ -29,77 +36,32 @@ func goDeltaCallback64(
 	curr_idx C.size_t,
 	prev_idx C.size_t,
 ) C.double {
-	fn := cgo.Handle(h).Value().(func(path *C.ClipperPath64,
-		path_normals *C.ClipperPathD,
-		curr_idx C.size_t,
-		prev_idx C.size_t) C.double)
+	fn := cgo.Handle(h).Value().(ClipperOffsetCallback)
 
-	log.Println("exported goDeltaCallback64")
-	res := fn(path, path_normals, curr_idx, prev_idx)
-
-	log.Println("result from callback is ", res)
-
-	return res
-}
-
-func TestCB(
-	path *C.ClipperPath64,
-	path_normals *C.ClipperPathD,
-	curr_idx C.size_t,
-	prev_idx C.size_t,
-) C.double {
-	log.Println("my custom callback is called with params ", curr_idx, prev_idx)
-	return 20.0
-}
-
-func Test() {
-	testcb := func(
-		path *C.ClipperPath64,
-		path_normals *C.ClipperPathD,
-		curr_idx C.size_t,
-		prev_idx C.size_t,
-	) C.double {
-		log.Println("my custom2 callback is called with params ", curr_idx, prev_idx)
-		return 20.0
+	gopath := &Path64{
+		p: path,
 	}
 
-	p := NewPath64()
+	gopath_normals := &PathD{
+		p: path_normals,
+	}
 
-	p.AddPoint(*NewPoint64(0, 0))
-	p.AddPoint(*NewPoint64(10, 0))
-	p.AddPoint(*NewPoint64(10, 10))
-	p.AddPoint(*NewPoint64(0, 10))
-	p.AddPoint(*NewPoint64(0, 0))
+	return C.double(fn(gopath, gopath_normals, int(curr_idx), int(prev_idx)))
+}
 
-	co := NewClipperoffset(0.2, 0, 0, 0)
-	co.AddPath64(*p, MiterJoin, PolygonEnd)
-	log.Println("check me")
-
+func (co *ClipperOffset) ExecuteCallback(cb ClipperOffsetCallback) *Paths64 {
+	// execute callback is placed here so that #define GO_BINDINGS is defined
 	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
 
-	h := cgo.NewHandle(testcb)
+	// create handle for callback
+	h := cgo.NewHandle(cb)
 	defer h.Delete()
 
-	p2 := &Paths64{
+	return &Paths64{
 		p: C.clipper_clipperoffset_execute_gocallback(mem, co.p, C.uintptr_t(h)),
 	}
-
-	log.Println(p2)
-
-	// res := co.ExecuteCallback(func(path *goclipper2.Path64, normals *goclipper2.PathD, currIdx, prevIdx int64) float64 {
-	// 	return 0.0
-	// })
-
-	// log.Println(res)
-
-	// // previous
-	// h := cgo.NewHandle(TestCB)
-
-	// res := C.go_callback(C.uintptr_t(h), nil, nil, 0, 0)
-	// log.Println("res is ", res)
-
-	// defer h.Delete()
 }
+
 func (p *Path64) String() string {
 	pts := p.ToPoints()
 
