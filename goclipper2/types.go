@@ -1,33 +1,105 @@
 package goclipper2
 
-// #cgo CFLAGS: -I${SRCDIR}/lib
-// #cgo LDFLAGS: -L${SRCDIR}/../lib -Wl,-rpath=\$ORIGIN/lib -lclipper2c
-// #include "../lib/clipper2c/clipper2c.h"
+/*
+#cgo CFLAGS: -I${SRCDIR}/lib
+#cgo LDFLAGS: -L/usr/local/lib -Wl,-rpath=\$ORIGIN/lib -lclipper2c
+
+#ifndef GO_BINDINGS
+#define GO_BINDINGS
+#endif
+
+#include "../lib/clipper2c/clipper2c.h"
+*/
 import "C"
 import (
 	"fmt"
 	"log"
 	"regexp"
+	"runtime/cgo"
 	"strconv"
 	"strings"
+	"unsafe"
 )
 
-type Clipper64 struct {
-	p *C.ClipperClipper64
+//export goDeltaCallback64
+func goDeltaCallback64(
+	h C.uintptr_t,
+	path *C.ClipperPath64,
+	path_normals *C.ClipperPathD,
+	curr_idx C.size_t,
+	prev_idx C.size_t,
+) C.double {
+	fn := cgo.Handle(h).Value().(func(path *C.ClipperPath64,
+		path_normals *C.ClipperPathD,
+		curr_idx C.size_t,
+		prev_idx C.size_t) C.double)
+
+	log.Println("exported goDeltaCallback64")
+	res := fn(path, path_normals, curr_idx, prev_idx)
+
+	log.Println("result from callback is ", res)
+
+	return res
 }
 
-type ClipperD struct {
-	p *C.ClipperClipperD
+func TestCB(
+	path *C.ClipperPath64,
+	path_normals *C.ClipperPathD,
+	curr_idx C.size_t,
+	prev_idx C.size_t,
+) C.double {
+	log.Println("my custom callback is called with params ", curr_idx, prev_idx)
+	return 20.0
 }
 
-type ClipperOffset struct {
-	p *C.ClipperClipperOffset
-}
+func Test() {
+	testcb := func(
+		path *C.ClipperPath64,
+		path_normals *C.ClipperPathD,
+		curr_idx C.size_t,
+		prev_idx C.size_t,
+	) C.double {
+		log.Println("my custom2 callback is called with params ", curr_idx, prev_idx)
+		return 20.0
+	}
 
-type Path64 struct {
-	p *C.ClipperPath64
-}
+	p := NewPath64()
 
+	p.AddPoint(*NewPoint64(0, 0))
+	p.AddPoint(*NewPoint64(10, 0))
+	p.AddPoint(*NewPoint64(10, 10))
+	p.AddPoint(*NewPoint64(0, 10))
+	p.AddPoint(*NewPoint64(0, 0))
+
+	co := NewClipperoffset(0.2, 0, 0, 0)
+	co.AddPath64(*p, MiterJoin, PolygonEnd)
+	log.Println("check me")
+
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
+
+	h := cgo.NewHandle(testcb)
+	defer h.Delete()
+
+	p2 := &Paths64{
+		p: C.clipper_clipperoffset_execute_gocallback(mem, co.p, C.uintptr_t(h)),
+	}
+
+	log.Println(p2)
+
+	// res := co.ExecuteCallback(func(path *goclipper2.Path64, normals *goclipper2.PathD, currIdx, prevIdx int64) float64 {
+	// 	return 0.0
+	// })
+
+	// log.Println(res)
+
+	// // previous
+	// h := cgo.NewHandle(TestCB)
+
+	// res := C.go_callback(C.uintptr_t(h), nil, nil, 0, 0)
+	// log.Println("res is ", res)
+
+	// defer h.Delete()
+}
 func (p *Path64) String() string {
 	pts := p.ToPoints()
 
@@ -70,6 +142,22 @@ func NewPath64OfString(str string) (*Path64, error) {
 	return result, nil
 }
 
+type Clipper64 struct {
+	p *C.ClipperClipper64
+}
+
+type ClipperD struct {
+	p *C.ClipperClipperD
+}
+
+type ClipperOffset struct {
+	p *C.ClipperClipperOffset
+}
+
+type Path64 struct {
+	p *C.ClipperPath64
+}
+
 type PathD struct {
 	p *C.ClipperPathD
 }
@@ -99,10 +187,6 @@ type PathsD struct {
 
 type Rect64 struct {
 	p *C.ClipperRect64
-}
-
-type RectD struct {
-	p *C.ClipperRectD
 }
 
 type PolyTree64 struct {
@@ -214,3 +298,17 @@ func NewPoint64(x, y int64) *Point64 {
 		},
 	}
 }
+
+type DeltaCallback func(
+	path *Path64,
+	normals *PathD,
+	currIdx int64,
+	prevIdx int64,
+) float64
+
+type callback func(
+	path *C.ClipperPath64,
+	normals *C.ClipperPathD,
+	currIdx C.int64_t,
+	prevIdx C.int64_t,
+) C.double

@@ -73,11 +73,15 @@ typedef enum ClipperPointInPolygonResult {
 } ClipperPointInPolygonResult;
 
 // delta callback for clipper offset
-typedef double (*ClipperDeltaCallback64)(
-  ClipperPath64* path,
-  ClipperPathD* path_normals,
-  size_t curr_idx,
-  size_t prev_idx);
+typedef double (*ClipperDeltaCallback64)(ClipperPath64 *path,
+                                         ClipperPathD *path_normals,
+                                         size_t curr_idx, size_t prev_idx);
+#ifdef GO_BINDINGS
+// delta callback given in golang
+extern double goDeltaCallback64(uintptr_t h, ClipperPath64 *path,
+                                ClipperPathD *path_normals, size_t curr_idx,
+                                size_t prev_idx);
+#endif
 
 #ifdef __cplusplus
 }

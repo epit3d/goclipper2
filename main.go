@@ -1,15 +1,11 @@
 package main
 
 import (
-	"log"
-
 	"github.com/epit3d/goclipper2/goclipper2"
 )
 
 func main() {
-	p := goclipper2.NewPath64()
+	goclipper2.Test()
+	// log.Print("hello")
 
-	p.AddPoint(*goclipper2.NewPoint64(0, 0))
-
-	log.Println(p)
 }

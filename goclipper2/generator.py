@@ -13,6 +13,7 @@ types_mapping = {
     'int64': 'int64',
     'size_t': 'int64',
     'char': 'string',
+    'uintptr_t': 'uintptr_t',
     'ClipperFillRule': 'ClipperFillRule',
     'ClipperClipType': 'ClipperClipType',
     'CLipperPathType': 'ClipperPathType',
@@ -253,39 +254,40 @@ def is_rect_clip(func: Type, params: List[Type]):
     ])
 
 
-def template_rect_clip(functype: Type, params: List[Type], has_mem: bool):
-    # for this pattern receiver is 3rd argument in signature
-    # print(params)
-    prev_params = params[:]
-    receiver = params.pop(1)
-    # receiver, params = params[2], params[:2] + params[3:]
+# rect_clip is temporarily disabled
+# def template_rect_clip(functype: Type, params: List[Type], has_mem: bool):
+#     # for this pattern receiver is 3rd argument in signature
+#     # print(params)
+#     prev_params = params[:]
+#     receiver = params.pop(1)
+#     # receiver, params = params[2], params[:2] + params[3:]
 
-    param_signature = ", ".join([
-        f"{p.name} {update_name_sign(p)}" for p in params
-    ])
+#     param_signature = ", ".join([
+#         f"{p.name} {update_name_sign(p)}" for p in params
+#     ])
 
-    param_call = ", ".join([update_name_pass(p) for p in prev_params])
+#     param_call = ", ".join([update_name_pass(p) for p in prev_params])
 
-    is_complex_return_type = is_complex_type_name(functype.type_name)
+#     is_complex_return_type = is_complex_type_name(functype.type_name)
 
-    if functype.type_name == "void":
-        ret_templ = f"""C.{functype.name}({"mem, " if has_mem else ""}{param_call})"""
-    elif is_complex_return_type:
-        ret_templ = f"""
-        return {"&" if functype.is_ptr else ""}{trim_typename(functype.type_name)}{{
-            p: C.{functype.name}({"mem, " if has_mem else ""}{param_call}),
-        }}
-        """
-    else:
-        ret_templ = f"""return {update_name_sign(functype)}(C.{functype.name}({"mem, " if has_mem else ""}{param_call}))"""
+#     if functype.type_name == "void":
+#         ret_templ = f"""C.{functype.name}({"mem, " if has_mem else ""}{param_call})"""
+#     elif is_complex_return_type:
+#         ret_templ = f"""
+#         return {"&" if functype.is_ptr else ""}{trim_typename(functype.type_name)}{{
+#             p: C.{functype.name}({"mem, " if has_mem else ""}{param_call}),
+#         }}
+#         """
+#     else:
+#         ret_templ = f"""return {update_name_sign(functype)}(C.{functype.name}({"mem, " if has_mem else ""}{param_call}))"""
 
-    return f"""
-    func ({receiver.name} *{trim_typename(receiver.type_name)}){trim_funcname_method(functype.name)}({param_signature}) {"*" if functype.is_ptr else ""}{update_name_sign(functype) if functype.type_name != "void" else ""} {{
-        {"var mem unsafe.Pointer = C.malloc(0)" if has_mem else ""}
+#     return f"""
+#     func ({receiver.name} *{trim_typename(receiver.type_name)}){trim_funcname_method(functype.name)}({param_signature}) {"*" if functype.is_ptr else ""}{update_name_sign(functype) if functype.type_name != "void" else ""} {{
+#         {"var mem unsafe.Pointer = C.malloc(0)" if has_mem else ""}
 
-        {ret_templ}
-    }}
-    """
+#         {ret_templ}
+#     }}
+#     """
 
 
 class FuncDefVisitor(c_ast.NodeVisitor):
@@ -296,13 +298,11 @@ class FuncDefVisitor(c_ast.NodeVisitor):
         self.methods_writer = open('methods.go', 'w')
         self.delete_writer = open('delete.go', 'w')
         self.destruct_writer = open('desctruct.go', 'w')
-        self.rect_clip_writer = open('rect_clip.go', 'w')
 
         self.constructor_writer.write(header)
         self.methods_writer.write(header)
         self.delete_writer.write(header_no_unsafe)
         self.destruct_writer.write(header_no_unsafe)
-        self.rect_clip_writer.write(header)
 
     def visit_FuncDecl(self, node):
         if type(node.type) == c_ast.PtrDecl and type(node.type.type) == c_ast.PtrDecl:
@@ -357,6 +357,10 @@ class FuncDefVisitor(c_ast.NodeVisitor):
         if any_broken:
             warnings.warn(f"broken function: {function}")
             return
+        
+        # we want to skip all rectD related functions
+        if "rectd" in function.name.lower():
+            return
 
         if is_constructor(function, params):
             self.constructor_writer.write(
@@ -374,17 +378,16 @@ class FuncDefVisitor(c_ast.NodeVisitor):
             # we skip size allocation of sizes
             return
         elif is_rect_clip(function, params):
-            self.rect_clip_writer.write(
-                template_rect_clip(function, params, has_mem))
+            # we skip rect clip
+            return
         else:
-            warnings.warn(f"unknown method {function}")
+            warnings.warn(f"unknown method {function} node {node}")
 
     def close(self):
         self.constructor_writer.close()
         self.methods_writer.close()
         self.delete_writer.close()
         self.destruct_writer.close()
-        self.rect_clip_writer.close()
 
 
 def show_func_defs(filename):
