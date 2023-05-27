@@ -264,17 +264,3 @@ func NewPoint64(x, y int64) *Point64 {
 		},
 	}
 }
-
-type DeltaCallback func(
-	path *Path64,
-	normals *PathD,
-	currIdx int64,
-	prevIdx int64,
-) float64
-
-type callback func(
-	path *C.ClipperPath64,
-	normals *C.ClipperPathD,
-	currIdx C.int64_t,
-	prevIdx C.int64_t,
-) C.double
