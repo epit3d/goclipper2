@@ -7,8 +7,6 @@ import (
 )
 
 func main() {
-	// goclipper2.Test()
-
 	var cb goclipper2.ClipperOffsetCallback = func(
 		path *goclipper2.Path64,
 		path_normals *goclipper2.PathD,
@@ -31,5 +29,6 @@ func main() {
 	co.AddPath64(*p, goclipper2.MiterJoin, goclipper2.PolygonEnd)
 	log.Println("check me")
 
-	co.ExecuteCallback(cb)
+	result := co.ExecuteCallback(cb)
+	log.Println(result)
 }

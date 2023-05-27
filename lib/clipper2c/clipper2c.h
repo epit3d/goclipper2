@@ -35,8 +35,8 @@ ClipperPathsD *clipper_pathsd_boolean_op(void *mem, ClipperClipType cliptype,
                                          ClipperPathsD *clips,
                                          int decimal_prec);
 void clipper_pathsd_boolean_op_tree(
-    ClipperClipType cliptype, ClipperFillRule fillrule, ClipperPathsD *subjects,
-    ClipperPathsD *clips, ClipperPolyTreeD *solution, int decimal_prec);
+        ClipperClipType cliptype, ClipperFillRule fillrule, ClipperPathsD *subjects,
+        ClipperPathsD *clips, ClipperPolyTreeD *solution, int decimal_prec);
 ClipperPathsD *clipper_pathsd_intersect(void *mem, ClipperPathsD *subjects,
                                         ClipperPathsD *clips,
                                         ClipperFillRule fillrule,
@@ -392,7 +392,7 @@ clipper_clipperoffset_execute_callback(void *mem, ClipperClipperOffset *c,
 #ifdef GO_BINDINGS
 ClipperPaths64 *
 clipper_clipperoffset_execute_gocallback(void *mem, ClipperClipperOffset *c,
-                                         uintptr_t h);
+                                         ClipperDeltaGoCallback64 cb);
 #endif
 // memory size
 

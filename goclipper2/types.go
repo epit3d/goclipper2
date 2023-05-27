@@ -2,13 +2,14 @@ package goclipper2
 
 /*
 #cgo CFLAGS: -I${SRCDIR}/lib
-#cgo LDFLAGS: -L/usr/local/lib -Wl,-rpath=\$ORIGIN/lib -lclipper2c
+#cgo LDFLAGS: -L${SRCDIR}/../lib -Wl,-rpath=\$ORIGIN/lib -lclipper2c
 
 #ifndef GO_BINDINGS
 #define GO_BINDINGS
 #endif
 
 #include "../lib/clipper2c/clipper2c.h"
+#include "callback.h"
 */
 import "C"
 import (
@@ -50,15 +51,18 @@ func goDeltaCallback64(
 }
 
 func (co *ClipperOffset) ExecuteCallback(cb ClipperOffsetCallback) *Paths64 {
-	// execute callback is placed here so that #define GO_BINDINGS is defined
-	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
-
 	// create handle for callback
 	h := cgo.NewHandle(cb)
 	defer h.Delete()
 
+	co.p.handle = C.uintptr_t(h)
+
+	// execute callback is placed here so that #define GO_BINDINGS is defined
+	var mem unsafe.Pointer = C.malloc(C.clipper_paths64_size())
+	f := C.callbackfunc(C.delta_callback)
+
 	return &Paths64{
-		p: C.clipper_clipperoffset_execute_gocallback(mem, co.p, C.uintptr_t(h)),
+		p: C.clipper_clipperoffset_execute_gocallback(mem, co.p, f),
 	}
 }
 
