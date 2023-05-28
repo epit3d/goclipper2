@@ -8,7 +8,9 @@ extern "C" {
 
 typedef struct ClipperClipper64 ClipperClipper64;
 typedef struct ClipperClipperD ClipperClipperD;
-typedef struct ClipperClipperOffset ClipperClipperOffset;
+typedef struct ClipperClipperOffset {
+  uintptr_t handle;
+} ClipperClipperOffset;
 typedef struct ClipperPath64 ClipperPath64;
 typedef struct ClipperPathD ClipperPathD;
 typedef struct ClipperPaths64 ClipperPaths64;
@@ -50,7 +52,10 @@ typedef enum ClipperClipType {
   XOR
 } ClipperClipType;
 
-typedef enum ClipperPathType { SUBJECT, CLIP } ClipperPathType;
+typedef enum ClipperPathType {
+  SUBJECT,
+  CLIP
+} ClipperPathType;
 
 typedef enum ClipperJoinType {
   SQUARE_JOIN,
@@ -77,10 +82,9 @@ typedef double (*ClipperDeltaCallback64)(ClipperPath64 *path,
                                          ClipperPathD *path_normals,
                                          size_t curr_idx, size_t prev_idx);
 #ifdef GO_BINDINGS
-// delta callback given in golang
-extern double goDeltaCallback64(uintptr_t h, ClipperPath64 *path,
-                                ClipperPathD *path_normals, size_t curr_idx,
-                                size_t prev_idx);
+typedef double (*ClipperDeltaGoCallback64)(uintptr_t h, ClipperPath64 *path,
+                                           ClipperPathD *path_normals, size_t curr_idx,
+                                           size_t prev_idx);
 #endif
 
 #ifdef __cplusplus
