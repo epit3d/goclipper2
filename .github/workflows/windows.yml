@@ -52,9 +52,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: example-artifacts
-          path:
-            - bin/main.exe
-            - lib
+          path: |
+            bin/main.exe
+            lib
 
   run-only:
     needs: build-and-test
