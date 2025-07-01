@@ -10,6 +10,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Cache Chocolatey packages to speed up choco install
+      - name: Cache Chocolatey packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            C:\ProgramData\chocolatey\lib
+            C:\ProgramData\chocolatey\cache
+          key: ${{ runner.os }}-choco-packages
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -21,8 +30,8 @@ jobs:
       - name: Add mingw to PATH
         shell: pwsh
         run: |
-          $mingw = "$Env:ProgramFiles\mingw-w64\mingw64\bin"
-          echo "::add-path::$mingw"
+          $mingw = "${Env:ProgramFiles}\mingw-w64\mingw64\bin"
+          echo $mingw >> $Env:GITHUB_PATH
 
       - name: Build all packages
         run: go build -v ./...
