@@ -47,3 +47,31 @@ jobs:
           $lib = "${Env:GITHUB_WORKSPACE}\lib"
           $Env:PATH = "$lib;$Env:PATH"
           & .\bin\main.exe
+
+      - name: Upload example artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: example-artifacts
+          path:
+            - bin/main.exe
+            - lib
+
+  run-only:
+    needs: build-and-test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download example artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: example-artifacts
+
+      - name: Run example binary without Go
+        shell: pwsh
+        run: |
+          $lib = "${Env:GITHUB_WORKSPACE}\lib"
+          $Env:PATH = "$lib;$Env:PATH"
+          & .\bin\main.exe
