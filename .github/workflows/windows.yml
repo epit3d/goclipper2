@@ -37,4 +37,8 @@ jobs:
         run: go build -v ./...
 
       - name: Run example main.go
-        run: go run main.go
+        shell: pwsh
+        run: |
+          $lib = "${Env:GITHUB_WORKSPACE}\lib"
+          $Env:PATH = "$lib;$Env:PATH"
+          go run main.go
