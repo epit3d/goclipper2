@@ -36,9 +36,14 @@ jobs:
       - name: Build all packages
         run: go build -v ./...
 
-      - name: Run example main.go
+      # build and run the example as a separate executable
+      - name: Build example executable
+        shell: pwsh
+        run: go build -o bin\main.exe main.go
+
+      - name: Run example binary
         shell: pwsh
         run: |
           $lib = "${Env:GITHUB_WORKSPACE}\lib"
           $Env:PATH = "$lib;$Env:PATH"
-          go run main.go
+          & .\bin\main.exe
